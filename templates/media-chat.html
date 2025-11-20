@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeuroMedia - AI Assistant</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/media-chat.css">
+    <style>
+        /* Индикатор загрузки */
+        .typing-indicator {
+            display: flex; gap: 5px; padding: 10px 15px;
+            background: #fff; border-radius: 12px; width: fit-content;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .dot {
+            width: 8px; height: 8px; background: #ccc; border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+        .dot:nth-child(1) { animation-delay: -0.32s; }
+        .dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+        
+        
+        /* Стили для хедера и переключателя */
+        .chat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-right: 40px;
+        }
+
+        .lang-switch {
+            background: transparent;
+            border: 1px solid var(--primary-green, #00C292);
+            color: var(--text-dark, #2D3436);
+            padding: 5px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+            white-space: nowrap;
+        }
+        .lang-switch:hover {
+            background: var(--primary-green, #00C292);
+            color: white;
+        }
+
+        /* Адаптив меню */
+        .sidebar-handle { display: none; }
+        @media (max-width: 768px) {
+            .sidebar { position: fixed; left: -260px; top: 0; height: 100vh; z-index: 200; }
+            .sidebar.open { left: 0; }
+            .sidebar-handle { display: flex; position: fixed; top: 20px; left: 20px; background: white; padding: 10px; border-radius: 8px; z-index: 300; box-shadow: 0 2px 5px rgba(0,0,0,0.1); cursor: pointer; }
+            .main-content { padding: 0; }
+            .chat-header { padding: 20px; padding-left: 70px; flex-direction: row; align-items: center; }
+            .chat-feed, .input-area-wrapper { padding-left: 20px; padding-right: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar-handle" id="sidebar-btn"><i class="fa-solid fa-chevron-right"></i></div>
+
+    <nav class="sidebar" id="sidebar">
+        <div class="logo">
+            <i class="fa-solid fa-bolt" style="color: var(--primary-green);"></i>
+            <div>
+                <span>NeuroMedia</span>
+                <span class="logo-subtitle" data-key="subtitle">Образовательная медиа-платформа</span>
+            </div>
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-item"><a href="./dashboard.html" class="nav-link"><i class="fa-solid fa-house"></i><span data-key="nav_dash">Панель управления</span></a></li>
+            <li class="nav-item"><a href="./media.html" class="nav-link"><i class="fa-solid fa-photo-film"></i><span data-key="nav_lib">Медиатека</span></a></li>
+            <li class="nav-item"><a href="./media-chat.html" class="nav-link active"><i class="fa-regular fa-comments"></i><span data-key="nav_chat">AI Медиа Чат</span></a></li>
+            <li class="nav-item"><a href="./ai-video.html" class="nav-link"><i class="fa-solid fa-scissors"></i><span data-key="nav_trim">AI Обрезка видео</span></a></li>
+            <li class="nav-item"><a href="./ai-chat.html" class="nav-link"><i class="fa-solid fa-robot"></i><span data-key="nav_bot">AI Чат-бот</span></a></li>
+            <li class="nav-item"><a href="./computer-v.html" class="nav-link"><i class="fa-regular fa-eye"></i><span data-key="nav_vision">Компьютерное зрение</span></a></li>
+            <li class="nav-item"><a href="./world-skils.html" class="nav-link"><i class="fa-solid fa-trophy"></i><span>WorldSkills</span></a></li>
+        </ul>
+        <div class="user-profile">
+            <img src="https://i.pravatar.cc/100?img=33" alt="User" class="avatar">
+            <div class="user-info"><h4>Алихан Б.</h4><p data-key="role">Студент</p></div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        
+        <header class="chat-header">
+            <div>
+                <h2 data-key="header_title">AI Медиа Ассистент</h2>
+                <p data-key="header_desc">Генерация постов и контента для соцсетей</p>
+            </div>
+            <button class="lang-switch" onclick="toggleLanguage()">🇰🇿 QAZ</button>
+        </header>
+
+        <div class="chat-feed" id="chat-feed">
+            <div class="message ai">
+                <div class="msg-avatar ai-icon"><i class="fa-solid fa-robot"></i></div>
+                <div class="msg-bubble" data-key="ai_greeting">
+                    Привет! Я помогаю создавать SMM посты. Опиши тему, и я напишу текст! ✍️
+                </div>
+            </div>
+        </div>
+
+        <div class="input-area-wrapper">
+            <div class="input-container">
+                <button class="attach-btn"><i class="fa-solid fa-paperclip"></i></button>
+                <input type="text" id="chat-input" data-key="input_ph" placeholder="Опишите тему поста (напр. 'Запуск нового IT курса')..." onkeypress="handleEnter(event)">
+                <button class="send-btn" id="send-btn" onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
+        </div>
+
+    </main>
+
+<script>
+    // --- CONFIG ---
+    const API_URL = "https://6f8f87dbbf11.ngrok-free.app/api/v1/social/generate-post";
+
+    // --- DOM ELEMENTS ---
+    const chatFeed = document.getElementById('chat-feed');
+    const input = document.getElementById('chat-input');
+    const sendBtn = document.getElementById('send-btn');
+    const sidebar = document.getElementById("sidebar");
+    const sidebarBtn = document.getElementById("sidebar-btn");
+    const btnIcon = sidebarBtn ? sidebarBtn.querySelector("i") : null;
+
+    // --- SIDEBAR LOGIC ---
+    if (sidebarBtn) {
+        sidebarBtn.addEventListener("click", () => {
+            sidebar.classList.toggle("open");
+            if(sidebar.classList.contains("open")) {
+                btnIcon.classList.replace("fa-chevron-right", "fa-chevron-left");
+            } else {
+                btnIcon.classList.replace("fa-chevron-left", "fa-chevron-right");
+            }
+        });
+    }
+
+    // --- LOCALIZATION LOGIC ---
+    let currentLang = 'ru';
+
+    const translations = {
+        ru: {
+            subtitle: "Образовательная медиа-платформа",
+            nav_dash: "Панель управления",
+            nav_lib: "Медиатека",
+            nav_chat: "AI Медиа Чат",
+            nav_trim: "AI Обрезка видео",
+            nav_bot: "AI Чат-бот",
+            nav_vision: "Компьютерное зрение",
+            role: "Студент",
+            header_title: "AI Медиа Ассистент",
+            header_desc: "Генерация постов и контента для соцсетей",
+            ai_greeting: "Привет! Я помогаю создавать SMM посты. Опиши тему, и я напишу текст! ✍️",
+            input_ph: "Опишите тему поста (напр. 'Запуск нового IT курса')...",
+            err_server: "Ошибка сервера.",
+            err_cors: "🔴 Ошибка CORS! <br>Браузер заблокировал запрос к Ngrok.<br><b>Решение:</b> Установите расширение 'Allow CORS' для браузера.",
+            empty_response: "Сервер вернул пустой текст."
+        },
+        kz: {
+            subtitle: "Білім беру медиа платформасы",
+            nav_dash: "Басқару тақтасы",
+            nav_lib: "Медиа кітапхана",
+            nav_chat: "AI Медиа Чаты",
+            nav_trim: "AI Видео Қию",
+            nav_bot: "AI Чат-бот",
+            nav_vision: "Компьютерлік көру",
+            role: "Студент",
+            header_title: "AI Медиа Ассистенті",
+            header_desc: "Әлеуметтік желілерге арналған посттар мен контент жасау",
+            ai_greeting: "Сәлем! Мен SMM посттар жазуға көмектесемін. Тақырыпты жаз, мен мәтін дайындап беремін! ✍️",
+            input_ph: "Пост тақырыбын жазыңыз (мыс. 'Жаңа IT курс ашу')...",
+            err_server: "Сервер қатесі.",
+            err_cors: "🔴 CORS қатесі! <br>Браузер сұранысты блоктады.<br><b>Шешім:</b> Браузерге 'Allow CORS' кеңейтімін орнатыңыз.",
+            empty_response: "Сервер бос мәтін қайтарды."
+        }
+    };
+
+    function toggleLanguage() {
+        currentLang = currentLang === 'ru' ? 'kz' : 'ru';
+        const langButton = document.querySelector('.lang-switch');
+        
+        langButton.textContent = currentLang === 'ru' ? '🇰🇿 QAZ' : '🇷🇺 RUS';
+
+        const elements = document.querySelectorAll('[data-key]');
+        elements.forEach(el => {
+            const key = el.getAttribute('data-key');
+            if (translations[currentLang][key]) {
+                if(el.tagName === 'INPUT') {
+                    el.placeholder = translations[currentLang][key];
+                } else {
+                    // Проверяем, не является ли это динамическим сообщением чата
+                    if (!el.classList.contains('msg-bubble') || el.parentElement.parentElement.children.length === 1) {
+                        el.textContent = translations[currentLang][key];
+                    }
+                }
+            }
+        });
+    }
+
+    // --- CHAT LOGIC ---
+
+    // ИСПРАВЛЕНИЕ 1: Функция handleEnter теперь в глобальной области видимости
+    function handleEnter(e) {
+        if (e.key === 'Enter') sendMessage();
+    }
+
+    async function sendMessage() {
+        const text = input.value.trim();
+        if (!text) return;
+
+        appendMessage(text, 'user');
+        input.value = '';
+        input.disabled = true;
+
+        const loadingId = showLoading();
+
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    // ИСПРАВЛЕНИЕ 2: Этот заголовок помогает, если Ngrok показывает страницу-предупреждение
+                    'ngrok-skip-browser-warning': 'true'
+                },
+                body: JSON.stringify({ title: text }) 
+            });
+
+            if (!response.ok) {
+                const errorDetail = await response.json().catch(() => ({}));
+                throw new Error(`Ошибка ${response.status}: ${JSON.stringify(errorDetail)}`);
+            }
+
+            const data = await response.json();
+            removeLoading(loadingId);
+
+            let postContent = data.text || translations[currentLang].empty_response;
+
+            if (data.hashtags && Array.isArray(data.hashtags)) {
+                const tagsString = data.hashtags.join(" "); 
+                postContent += `\n\n${tagsString}`; 
+            }
+
+            appendMessage(postContent, 'ai');
+
+        } catch (error) {
+            console.error(error);
+            removeLoading(loadingId);
+            
+            let errorMsg = translations[currentLang].err_server;
+            
+            // Проверка на CORS (если заголовки не помогли)
+            if (error.message.includes("Failed to fetch")) {
+                errorMsg = translations[currentLang].err_cors;
+            } else {
+                errorMsg = "⚠️ " + error.message;
+            }
+            
+            appendMessage(errorMsg, 'ai');
+        } finally {
+            input.disabled = false;
+            input.focus();
+        }
+    }
+
+    function appendMessage(text, sender) {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `message ${sender}`;
+
+        if (sender === 'ai') {
+            msgDiv.innerHTML = `
+                <div class="msg-avatar ai-icon"><i class="fa-solid fa-robot"></i></div>
+                <div class="msg-bubble">${formatText(text)}</div>
+            `;
+        } else {
+            msgDiv.innerHTML = `
+                <div class="msg-bubble">${formatText(text)}</div>
+            `;
+        }
+
+        chatFeed.appendChild(msgDiv);
+        scrollToBottom();
+    }
+
+    function formatText(text) {
+        return text.replace(/\n/g, '<br>');
+    }
+
+    function showLoading() {
+        const id = 'loading-' + Date.now();
+        const loadingDiv = document.createElement('div');
+        loadingDiv.className = 'message ai';
+        loadingDiv.id = id;
+        loadingDiv.innerHTML = `
+            <div class="msg-avatar ai-icon"><i class="fa-solid fa-robot"></i></div>
+            <div class="typing-indicator">
+                <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+            </div>
+        `;
+        chatFeed.appendChild(loadingDiv);
+        scrollToBottom();
+        return id;
+    }
+
+    function removeLoading(id) {
+        const element = document.getElementById(id);
+        if (element) element.remove();
+    }
+
+    function scrollToBottom() {
+        chatFeed.scrollTop = chatFeed.scrollHeight;
+    }
+
+</script>
+
+</body>
+</html>

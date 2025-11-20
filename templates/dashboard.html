@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeuroMedia - Панель управления</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/main.css">
+    <style>
+        /* Стили для переключателя языка */
+        .lang-switch {
+            background: transparent;
+            border: 1px solid var(--primary-green, #00C292);
+            color: var(--text-dark, #333);
+            padding: 5px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-left: 15px;
+            transition: 0.3s;
+        }
+        .lang-switch:hover {
+            background: var(--primary-green, #00C292);
+            color: white;
+        }
+        .header-controls {
+            display: flex;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <section class="view">
+        <nav class="sidebar" id="sidebar">
+            <div class="logo">
+                <i class="fa-solid fa-bolt" style="color: var(--primary-green, #00C292);"></i>
+                <div>
+                    <span>NeuroMedia</span>
+                    <span class="logo-subtitle" data-key="subtitle">Образовательная медиа-платформа</span>
+                </div>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="./dashboard.html" class="nav-link active">
+                        <i class="fa-solid fa-house"></i><span data-key="nav_dash">Панель управления</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="./media.html" class="nav-link">
+                        <i class="fa-solid fa-photo-film"></i><span data-key="nav_lib">Медиатека</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="./media-chat.html" class="nav-link">
+                        <i class="fa-regular fa-comments"></i><span data-key="nav_chat">AI Медиа Чат</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="./ai-video.html" class="nav-link">
+                        <i class="fa-solid fa-scissors"></i><span data-key="nav_trim">AI Обрезка видео</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="./ai-chat.html" class="nav-link">
+                        <i class="fa-solid fa-robot"></i><span data-key="nav_bot">AI Чат-бот</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="./computer-v.html" class="nav-link">
+                        <i class="fa-regular fa-eye"></i><span data-key="nav_vision">Компьютерное зрение</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="./world-skils.html" class="nav-link">
+                        <i class="fa-solid fa-trophy"></i><span>WorldSkills</span>
+                    </a>
+                </li>
+            </ul>
+            <div class="user-profile">
+                <img src="https://i.pravatar.cc/100?img=33" alt="User" class="avatar">
+                <div class="user-info">
+                    <h4>Алихан Б.</h4>
+                    <p data-key="role">Студент</p>
+                </div>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <header style="display: flex; justify-content: space-between; align-items: center;">
+                <div class="header-title">
+                    <h1 data-key="header_title">Панель управления</h1>
+                    <p data-key="header_desc">Добро пожаловать, управляйте вашим контентом</p>
+                </div>
+                <div class="header-controls">
+                    <button class="btn-primary">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> <span data-key="btn_upload">Загрузить</span>
+                    </button>
+                    <button class="lang-switch" onclick="toggleLanguage()">🇰🇿 QAZ</button>
+                </div>
+            </header>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon bg-green"><i class="fa-regular fa-images"></i></div>
+                        <span class="badge badge-green">+12%</span>
+                    </div>
+                    <div>
+                        <div class="stat-value">1,248</div>
+                        <div class="stat-label" data-key="stat_files">Всего файлов</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon bg-blue"><i class="fa-solid fa-video"></i></div>
+                        <span class="badge badge-blue">+8%</span>
+                    </div>
+                    <div>
+                        <div class="stat-value">342</div>
+                        <div class="stat-label" data-key="stat_videos">Видео обработано</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon bg-purple"><i class="fa-regular fa-comments"></i></div>
+                        <span class="badge badge-purple">+24%</span>
+                    </div>
+                    <div>
+                        <div class="stat-value">856</div>
+                        <div class="stat-label" data-key="stat_ai">AI Взаимодействия</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon bg-orange"><i class="fa-regular fa-eye"></i></div>
+                        <span class="badge badge-orange">+16%</span>
+                    </div>
+                    <div>
+                        <div class="stat-value">2,145</div>
+                        <div class="stat-label" data-key="stat_vision">Анализ зрения</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-grid">
+                
+                <div class="card-container">
+                    <h3 class="section-title" data-key="recent_act">Последняя активность</h3>
+                    <div class="activity-list">
+                        
+                        <div class="activity-item">
+                            <div class="activity-icon bg-green"><i class="fa-solid fa-upload"></i></div>
+                            <div class="activity-details">
+                                <h5 data-key="act_upload">Загружено новое видео</h5>
+                                <p>campus_event_2024.mp4</p>
+                            </div>
+                            <span class="activity-time" data-key="time_2m">2 мин. назад</span>
+                        </div>
+
+                        <div class="activity-item">
+                            <div class="activity-icon bg-blue"><i class="fa-solid fa-scissors"></i></div>
+                            <div class="activity-details">
+                                <h5 data-key="act_trim">Видео успешно обрезано</h5>
+                                <p>interview_final.mp4</p>
+                            </div>
+                            <span class="activity-time" data-key="time_15m">15 мин. назад</span>
+                        </div>
+
+                        <div class="activity-item">
+                            <div class="activity-icon bg-purple"><i class="fa-solid fa-robot"></i></div>
+                            <div class="activity-details">
+                                <h5 data-key="act_gen">AI создал медиа контент</h5>
+                                <p data-key="act_gen_desc">Создано 3 варианта</p>
+                            </div>
+                            <span class="activity-time" data-key="time_1h">1 час назад</span>
+                        </div>
+
+                        <div class="activity-item">
+                            <div class="activity-icon bg-orange"><i class="fa-regular fa-eye"></i></div>
+                            <div class="activity-details">
+                                <h5 data-key="act_vis">Визуальный анализ завершен</h5>
+                                <p data-key="act_vis_desc">Обнаружено 12 объектов, 4 лица</p>
+                            </div>
+                            <span class="activity-time" data-key="time_3h">3 часа назад</span>
+                        </div>
+
+                        <div class="activity-item">
+                            <div class="activity-icon bg-blue"><i class="fa-solid fa-scissors"></i></div>
+                            <div class="activity-details">
+                                <h5 data-key="act_trim">Видео успешно обрезано</h5>
+                                <p>interview_final.mp4</p>
+                            </div>
+                            <span class="activity-time" data-key="time_15m">15 мин. назад</span>
+                        </div>
+                        
+                         <div class="activity-item">
+                            <div class="activity-icon bg-purple"><i class="fa-solid fa-robot"></i></div>
+                            <div class="activity-details">
+                                <h5 data-key="act_gen">AI создал медиа контент</h5>
+                                <p data-key="act_gen_desc">Создано 3 варианта</p>
+                            </div>
+                            <span class="activity-time" data-key="time_1h">1 час назад</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-container" style="height: auto; align-self: start;">
+                    <h3 class="section-title" data-key="quick_act">Быстрые действия</h3>
+                    <div class="quick-actions">
+                        <button class="action-btn primary">
+                            <i class="fa-solid fa-upload"></i> <span data-key="btn_upload">Загрузить</span>
+                        </button>
+                        <button class="action-btn">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> <span data-key="btn_generate">Создать с AI</span>
+                        </button>
+                        <button class="action-btn">
+                            <i class="fa-solid fa-scissors"></i> <span data-key="btn_trim">Обрезать видео</span>
+                        </button>
+                        <button class="action-btn">
+                            <i class="fa-regular fa-eye"></i> <span data-key="btn_analyze">Анализ медиа</span>
+                        </button>
+                    </div>
+
+                    <div class="storage-widget">
+                        <div class="storage-header">
+                            <span data-key="storage_title">Хранилище</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill"></div>
+                        </div>
+                        <div class="storage-text" data-key="storage_desc">6.8 ГБ из 10 ГБ занято</div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </section>
+    <div class="sidebar-handle" id="sidebar-btn"></div>
+
+<script>
+    const sidebar = document.getElementById("sidebar");
+    const btn = document.getElementById("sidebar-btn");
+
+    btn.addEventListener("click", () => {
+        sidebar.classList.toggle("open");
+    });
+
+    // --- Локализация (RU / KZ) ---
+    let currentLang = 'ru';
+
+    const translations = {
+        ru: {
+            subtitle: "Образовательная медиа-платформа",
+            nav_dash: "Панель управления",
+            nav_lib: "Медиатека",
+            nav_chat: "AI Медиа Чат",
+            nav_trim: "AI Обрезка видео",
+            nav_bot: "AI Чат-бот",
+            nav_vision: "Компьютерное зрение",
+            role: "Студент",
+            header_title: "Панель управления",
+            header_desc: "Добро пожаловать, управляйте вашим контентом",
+            btn_upload: "Загрузить",
+            stat_files: "Всего файлов",
+            stat_videos: "Видео обработано",
+            stat_ai: "AI Взаимодействия",
+            stat_vision: "Анализ зрения",
+            recent_act: "Последняя активность",
+            act_upload: "Загружено новое видео",
+            time_2m: "2 мин. назад",
+            act_trim: "Видео успешно обрезано",
+            time_15m: "15 мин. назад",
+            act_gen: "AI создал медиа контент",
+            act_gen_desc: "Создано 3 варианта",
+            time_1h: "1 час назад",
+            act_vis: "Визуальный анализ завершен",
+            act_vis_desc: "Обнаружено 12 объектов, 4 лица",
+            time_3h: "3 часа назад",
+            quick_act: "Быстрые действия",
+            btn_generate: "Создать с AI",
+            btn_trim: "Обрезать видео",
+            btn_analyze: "Анализ медиа",
+            storage_title: "Хранилище",
+            storage_desc: "6.8 ГБ из 10 ГБ занято"
+        },
+        kz: {
+            subtitle: "Білім беру медиа платформасы",
+            nav_dash: "Басқару тақтасы",
+            nav_lib: "Медиа кітапхана",
+            nav_chat: "AI Медиа Чаты",
+            nav_trim: "AI Видео Қию",
+            nav_bot: "AI Чат-бот",
+            nav_vision: "Компьютерлік көру",
+            role: "Студент",
+            header_title: "Басқару тақтасы",
+            header_desc: "Қош келдіңіз, контентіңізді басқарыңыз",
+            btn_upload: "Жүктеу",
+            stat_files: "Барлық файлдар",
+            stat_videos: "Өңделген видеолар",
+            stat_ai: "AI Әрекеттесу",
+            stat_vision: "Көру талдауы",
+            recent_act: "Соңғы белсенділік",
+            act_upload: "Жаңа видео жүктелді",
+            time_2m: "2 мин. бұрын",
+            act_trim: "Видео сәтті қиылды",
+            time_15m: "15 мин. бұрын",
+            act_gen: "AI медиа контент жасады",
+            act_gen_desc: "3 нұсқа жасалды",
+            time_1h: "1 сағат бұрын",
+            act_vis: "Визуалды талдау аяқталды",
+            act_vis_desc: "12 нысан, 4 тұлға табылды",
+            time_3h: "3 сағат бұрын",
+            quick_act: "Жылдам әрекеттер",
+            btn_generate: "AI-мен жасау",
+            btn_trim: "Видеоны қию",
+            btn_analyze: "Медианы талдау",
+            storage_title: "Сақтау орны",
+            storage_desc: "10 ГБ-тан 6.8 ГБ қолданылды"
+        }
+    };
+
+    function toggleLanguage() {
+        currentLang = currentLang === 'ru' ? 'kz' : 'ru';
+        const langButton = document.querySelector('.lang-switch');
+        
+        // Обновляем текст кнопки
+        langButton.textContent = currentLang === 'ru' ? '🇰🇿 QAZ' : '🇷🇺 RUS';
+
+        // Обновляем все тексты на странице
+        const elements = document.querySelectorAll('[data-key]');
+        elements.forEach(el => {
+            const key = el.getAttribute('data-key');
+            if (translations[currentLang][key]) {
+                el.textContent = translations[currentLang][key];
+            }
+        });
+    }
+</script>
+
+</body>
+</html>

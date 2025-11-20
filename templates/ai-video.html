@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeuroMedia - AI Обрезка Видео</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/ai-video.css"> 
+    <style>
+        /* --- Дополнительные стили --- */
+        #hidden-video-input { display: none; }
+        .video-preview-box video { width: 100%; height: 100%; object-fit: contain; border-radius: 12px; }
+        
+        /* Стили для переключателя */
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        .lang-switch {
+            background: transparent;
+            border: 1px solid var(--primary-green, #00C292);
+            color: var(--text-dark, #2D3436);
+            padding: 5px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+            white-space: nowrap;
+        }
+        .lang-switch:hover {
+            background: var(--primary-green, #00C292);
+            color: white;
+        }
+
+        /* Loading state */
+        .loading-state { display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--primary-green); height: 100%; }
+        .loading-state i { font-size: 40px; margin-bottom: 15px; }
+
+        /* Адаптив */
+        @media (max-width: 768px) {
+             .header-content { flex-direction: row; gap: 10px; }
+             .page-header h2 { font-size: 20px; }
+             .page-header p { font-size: 12px; }
+             .sidebar-handle { display: flex; }
+        }
+    </style>
+</head>
+<body>
+
+    <input type="file" id="hidden-video-input" accept="video/*">
+    <div class="sidebar-handle" id="sidebar-btn"></div>
+
+    <nav class="sidebar" id="sidebar">
+        <div class="logo">
+            <i class="fa-solid fa-bolt" style="color: var(--primary-green);"></i>
+            <div>
+                <span>NeuroMedia</span>
+                <span class="logo-subtitle" data-key="subtitle">Образовательная медиа-платформа</span>
+            </div>
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-item"><a href="./dashboard.html" class="nav-link"><i class="fa-solid fa-house"></i><span data-key="nav_dash">Панель управления</span></a></li>
+            <li class="nav-item"><a href="./media.html" class="nav-link"><i class="fa-solid fa-photo-film"></i><span data-key="nav_lib">Медиатека</span></a></li>
+            <li class="nav-item"><a href="./media-chat.html" class="nav-link"><i class="fa-regular fa-comments"></i><span data-key="nav_chat">AI Медиа Чат</span></a></li>
+            <li class="nav-item"><a href="./ai-video.html" class="nav-link active"><i class="fa-solid fa-scissors"></i><span data-key="nav_trim">AI Обрезка видео</span></a></li>
+            <li class="nav-item"><a href="./ai-chat.html" class="nav-link"><i class="fa-solid fa-robot"></i><span data-key="nav_bot">AI Чат-бот</span></a></li>
+            <li class="nav-item"><a href="./computer-v.html" class="nav-link"><i class="fa-regular fa-eye"></i><span data-key="nav_vision">Компьютерное зрение</span></a></li>
+            <li class="nav-item"><a href="./world-skils.html" class="nav-link"><i class="fa-solid fa-trophy"></i><span>WorldSkills</span></a></li>
+        </ul>
+        <div class="user-profile">
+            <img src="https://i.pravatar.cc/100?img=33" alt="User" class="avatar">
+            <div class="user-info"><h4>Алихан Б.</h4><p data-key="role">Студент</p></div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        
+        <header class="page-header">
+            <div class="header-content">
+                <div>
+                    <h2 data-key="header_title">AI Обрезка Видео</h2>
+                    <p data-key="header_desc">Редактируйте видео по вашему желанию</p>
+                </div>
+                <button class="lang-switch" onclick="toggleLanguage()">🇰🇿 QAZ</button>
+            </div>
+        </header>
+
+        <div class="workspace">
+            
+            <div class="video-column">
+                <h3 class="video-title" data-key="video_input">Входное видео</h3>
+                <div class="video-preview-box" id="input-container">
+                    <div id="input-placeholder" style="text-align: center;">
+                        <i class="fa-solid fa-play play-icon"></i>
+                        <span class="preview-text" style="display:block" data-key="preview_in">Предпросмотр<br>Загрузите видео для начала</span>
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn btn-upload" onclick="triggerUpload()">
+                        <i class="fa-solid fa-upload"></i> <span data-key="btn_upload">Загрузить</span>
+                    </button>
+                    <button class="btn btn-delete" onclick="deleteVideo()">
+                        <i class="fa-solid fa-trash"></i> <span data-key="btn_delete">Удалить</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="video-column">
+                <h3 class="video-title" data-key="video_output">Результат</h3>
+                <div class="video-preview-box" id="output-container">
+                     <div id="output-placeholder" style="text-align: center;">
+                        <i class="fa-solid fa-play play-icon"></i>
+                        <span class="preview-text" style="display:block" data-key="preview_out">Результат<br>Ожидание обработки</span>
+                    </div>
+                </div>
+                <div class="output-actions">
+                    <button class="btn btn-export" id="export-btn" onclick="downloadResult()">
+                        <i class="fa-solid fa-download"></i> <span data-key="btn_export">Экспорт</span>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="prompt-area">
+            <button class="icon-btn"><i class="fa-solid fa-paperclip"></i></button>
+            <textarea class="prompt-input" id="prompt-text" data-key="prompt_ph" placeholder="Опишите, как нужно обрезать или изменить видео..."></textarea>
+            <button class="icon-btn send-btn" onclick="processVideo()"><i class="fa-solid fa-paper-plane"></i></button>
+        </div>
+
+    </main>
+
+<script>
+    // --- LOCALIZATION (RU/KZ) ---
+    let currentLang = 'ru';
+
+    const translations = {
+        ru: {
+            subtitle: "Образовательная медиа-платформа",
+            nav_dash: "Панель управления",
+            nav_lib: "Медиатека",
+            nav_chat: "AI Медиа Чат",
+            nav_trim: "AI Обрезка видео",
+            nav_bot: "AI Чат-бот",
+            nav_vision: "Компьютерное зрение",
+            role: "Студент",
+            header_title: "AI Обрезка Видео",
+            header_desc: "Редактируйте видео по вашему желанию",
+            video_input: "Входное видео",
+            preview_in: "Предпросмотр<br>Загрузите видео для начала",
+            btn_upload: "Загрузить",
+            btn_delete: "Удалить",
+            video_output: "Результат",
+            preview_out: "Результат<br>Ожидание обработки",
+            btn_export: "Экспорт",
+            prompt_ph: "Опишите, как нужно обрезать или изменить видео..."
+        },
+        kz: {
+            subtitle: "Білім беру медиа платформасы",
+            nav_dash: "Басқару тақтасы",
+            nav_lib: "Медиа кітапхана",
+            nav_chat: "AI Медиа Чаты",
+            nav_trim: "AI Видео Қию",
+            nav_bot: "AI Чат-бот",
+            nav_vision: "Компьютерлік көру",
+            role: "Студент",
+            header_title: "AI Видео Қию",
+            header_desc: "Видеоны қалауыңызша өңдеңіз",
+            video_input: "Кіріс видео",
+            preview_in: "Алдын ала көру<br>Бастау үшін видео жүктеңіз",
+            btn_upload: "Жүктеу",
+            btn_delete: "Өшіру",
+            video_output: "Нәтиже",
+            preview_out: "Нәтиже<br>Өңдеуді күтуде",
+            btn_export: "Экспорттау",
+            prompt_ph: "Видеоны қалай өзгерту керектігін сипаттаңыз..."
+        }
+    };
+
+    function toggleLanguage() {
+        currentLang = currentLang === 'ru' ? 'kz' : 'ru';
+        const langButton = document.querySelector('.lang-switch');
+        langButton.textContent = currentLang === 'ru' ? '🇰🇿 QAZ' : '🇷🇺 RUS';
+
+        const elements = document.querySelectorAll('[data-key]');
+        elements.forEach(el => {
+            const key = el.getAttribute('data-key');
+            if (translations[currentLang][key]) {
+                if (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT') {
+                    el.placeholder = translations[currentLang][key];
+                } else if (el.classList.contains('preview-text')) {
+                    el.innerHTML = translations[currentLang][key]; // Для сохранения <br>
+                } else {
+                    el.textContent = translations[currentLang][key];
+                }
+            }
+        });
+    }
+
+
+    // --- LOGIC ---
+    const sidebar = document.getElementById("sidebar");
+    const btn = document.getElementById("sidebar-btn");
+    const btnIcon = btn ? btn.querySelector("i") : null;
+
+    if(btn){
+        btn.addEventListener("click", () => {
+            sidebar.classList.toggle("open");
+            if(sidebar.classList.contains("open")) btnIcon.classList.replace("fa-chevron-right", "fa-chevron-left");
+            else btnIcon.classList.replace("fa-chevron-left", "fa-chevron-right");
+        });
+    }
+
+    // --- VIDEO LOGIC ---
+    const API_URL = "https://6659ea9756b0.ngrok-free.app/api/v1/worldskills/video-to-reel";
+    const hiddenInput = document.getElementById('hidden-video-input');
+    const inputContainer = document.getElementById('input-container');
+    const inputPlaceholder = document.getElementById('input-placeholder');
+    const outputContainer = document.getElementById('output-container');
+    const outputPlaceholder = document.getElementById('output-placeholder');
+    const promptInput = document.getElementById('prompt-text');
+
+    let currentVideoFile = null;
+    let resultBlobUrl = null;
+
+    function triggerUpload() { hiddenInput.click(); }
+
+    hiddenInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        currentVideoFile = file;
+        inputPlaceholder.style.display = 'none';
+        
+        const oldVid = inputContainer.querySelector('video');
+        if(oldVid) oldVid.remove();
+
+        const videoUrl = URL.createObjectURL(file);
+        const videoEl = document.createElement('video');
+        videoEl.src = videoUrl;
+        videoEl.controls = true;
+        inputContainer.appendChild(videoEl);
+    });
+
+    function deleteVideo() {
+        hiddenInput.value = "";
+        currentVideoFile = null;
+        const oldVid = inputContainer.querySelector('video');
+        if(oldVid) oldVid.remove();
+        inputPlaceholder.style.display = 'block';
+    }
+
+    async function processVideo() {
+        const text = promptInput.value.trim();
+        if (!currentVideoFile) { alert(currentLang === 'ru' ? "Загрузите видео" : "Видео жүктеңіз"); return; }
+        if (!text) { alert(currentLang === 'ru' ? "Введите описание" : "Сипаттама жазыңыз"); return; }
+
+        outputPlaceholder.style.display = 'none';
+        const oldOutVid = outputContainer.querySelector('video');
+        if(oldOutVid) oldOutVid.remove();
+        
+        const oldLoader = outputContainer.querySelector('.loading-state');
+        if(oldLoader) oldLoader.remove();
+
+        const loader = document.createElement('div');
+        loader.className = 'loading-state';
+        loader.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>Processing...</span>';
+        outputContainer.appendChild(loader);
+
+        const formData = new FormData();
+        formData.append('video', currentVideoFile);
+        formData.append('prompt', text);
+
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'ngrok-skip-browser-warning': 'true' },
+                body: formData
+            });
+
+            if (!response.ok) throw new Error(`Error: ${response.status}`);
+
+            const blob = await response.blob();
+            resultBlobUrl = URL.createObjectURL(blob);
+
+            loader.remove();
+
+            const resVideoEl = document.createElement('video');
+            resVideoEl.src = resultBlobUrl;
+            resVideoEl.controls = true;
+            outputContainer.appendChild(resVideoEl);
+
+        } catch (error) {
+            console.error(error);
+            loader.innerHTML = '<span style="color:red">Error</span>';
+        }
+    }
+
+    function downloadResult() {
+        if (!resultBlobUrl) return;
+        const a = document.createElement('a');
+        a.href = resultBlobUrl;
+        a.download = "result.mp4";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
+</script>
+</body>
+</html>

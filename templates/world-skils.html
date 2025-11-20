@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeuroMedia - WorldSkills</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/world-skils.css">
+    <style>
+        /* Доп стили для медиа в чате */
+        .chat-media { max-width: 100%; border-radius: 12px; margin-top: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .chat-video { width: 100%; max-width: 300px; border-radius: 12px; }
+        
+        /* Кнопка генерации картинки */
+        .action-btn-group { display: flex; gap: 10px; padding: 0 40px 10px 40px; }
+        .mode-btn {
+            background: white; border: 1px solid #E0E6ED; color: #2D3436;
+            padding: 8px 15px; border-radius: 20px; font-size: 12px; cursor: pointer; 
+            transition: 0.2s; display: flex; align-items: center; gap: 5px;
+        }
+        .mode-btn:hover { background: #f5f5f5; border-color: #ccc; }
+        
+        /* Переключатель языка */
+        .header-content {
+            display: flex; justify-content: space-between; align-items: center; width: 100%; padding-right: 40px;
+        }
+        .lang-switch {
+            background: transparent; border: 1px solid var(--primary-green, #00C292);
+            color: var(--text-dark, #333); padding: 5px 15px; border-radius: 20px;
+            cursor: pointer; font-weight: bold; transition: 0.3s; white-space: nowrap;
+        }
+        .lang-switch:hover { background: var(--primary-green, #00C292); color: white; }
+
+        /* Индикатор загрузки */
+        .loading-dots:after { content: ' .'; animation: dots 1s steps(5, end) infinite; }
+        @keyframes dots {
+            0%, 20% { color: rgba(0,0,0,0); text-shadow: .25em 0 0 rgba(0,0,0,0), .5em 0 0 rgba(0,0,0,0);}
+            40% { color: #333; text-shadow: .25em 0 0 rgba(0,0,0,0), .5em 0 0 rgba(0,0,0,0);}
+            60% { text-shadow: .25em 0 0 #333, .5em 0 0 rgba(0,0,0,0);}
+            80%, 100% { text-shadow: .25em 0 0 #333, .5em 0 0 #333;}
+        }
+        
+        #video-upload { display: none; }
+
+        /* Адаптив */
+        .sidebar-handle { display: none; }
+        @media (max-width: 768px) {
+            .sidebar { position: fixed; left: -260px; top: 0; height: 100vh; z-index: 200; }
+            .sidebar.open { left: 0; }
+            .sidebar-handle { display: flex; position: fixed; top: 20px; left: 20px; background: white; padding: 10px; border-radius: 8px; z-index: 300; box-shadow: 0 2px 5px rgba(0,0,0,0.1); cursor: pointer; }
+            .main-content { padding: 0; }
+            .chat-header { padding: 20px; padding-left: 70px; } 
+            .chat-header .header-content { padding-right: 0; }
+            .chat-feed, .input-wrapper, .action-btn-group { padding-left: 20px; padding-right: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar-handle" id="sidebar-btn"></div>
+
+    <nav class="sidebar" id="sidebar">
+        <div class="logo">
+            <i class="fa-solid fa-bolt" style="color: var(--primary-green);"></i>
+            <div>
+                <span>NeuroMedia</span>
+                <span class="logo-subtitle" data-key="subtitle">Образовательная медиа-платформа</span>
+            </div>
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-item"><a href="./dashboard.html" class="nav-link"><i class="fa-solid fa-house"></i><span data-key="nav_dash">Панель управления</span></a></li>
+            <li class="nav-item"><a href="./media.html" class="nav-link"><i class="fa-solid fa-photo-film"></i><span data-key="nav_lib">Медиатека</span></a></li>
+            <li class="nav-item"><a href="./media-chat.html" class="nav-link"><i class="fa-regular fa-comments"></i><span data-key="nav_chat">AI Медиа Чат</span></a></li>
+            <li class="nav-item"><a href="./ai-video.html" class="nav-link"><i class="fa-solid fa-scissors"></i><span data-key="nav_trim">AI Обрезка видео</span></a></li>
+            <li class="nav-item"><a href="./ai-chat.html" class="nav-link"><i class="fa-solid fa-robot"></i><span data-key="nav_bot">AI Чат-бот</span></a></li>
+            <li class="nav-item"><a href="./computer-v.html" class="nav-link"><i class="fa-regular fa-eye"></i><span data-key="nav_vision">Компьютерное зрение</span></a></li>
+            <li class="nav-item"><a href="./world-skils.html" class="nav-link active"><i class="fa-solid fa-trophy"></i><span>WorldSkills</span></a></li>
+        </ul>
+        <div class="user-profile">
+            <img src="https://i.pravatar.cc/100?img=33" alt="User" class="avatar">
+            <div class="user-info"><h4>Алихан Б.</h4><p data-key="role">Студент</p></div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        
+        <header class="chat-header">
+            <div class="header-content">
+                <div>
+                    <h2 data-key="header_title">WorldSkills Ассистент</h2>
+                    <p data-key="header_desc">Генерация контента, постеров и видео для WorldSkills</p>
+                </div>
+                <button class="lang-switch" onclick="toggleLanguage()">🇰🇿 QAZ</button>
+            </div>
+        </header>
+
+        <div class="chat-feed" id="chat-feed">
+            <div class="message-row ai">
+                <div class="ai-avatar"><i class="fa-solid fa-robot"></i></div>
+                <div class="msg-content">
+                    <div class="bubble" data-key="ai_greeting">
+                        Привет! Я помогу с WorldSkills. <br>
+                        📝 <b>Пиши текст</b> для генерации контента.<br>
+                        🎨 Жми <b>"Постер"</b> для генерации картинок.<br>
+                        📎 Жми <b>Скрепку</b> для создания Reels из видео.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="action-btn-group">
+            <button class="mode-btn" onclick="generateImage()">
+                <i class="fa-solid fa-palette"></i> <span data-key="btn_poster">Сгенерировать Постер</span>
+            </button>
+        </div>
+
+        <div class="input-wrapper">
+            <input type="file" id="video-upload" accept="video/*">
+            
+            <button class="icon-btn" onclick="triggerVideoUpload()"><i class="fa-solid fa-paperclip"></i></button>
+            
+            <div class="chat-input-box">
+                <input type="text" id="chat-input" data-key="input_ph" placeholder="Опишите задачу или введите промпт..." onkeypress="if(event.key==='Enter') sendMessage()">
+                <button class="icon-btn send-btn" onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
+        </div>
+
+    </main>
+
+<script>
+    // --- CONFIG ---
+    const BASE_URL = "https://6f8f87dbbf11.ngrok-free.app/api/v1/worldskills";
+
+    // --- DOM ELEMENTS ---
+    const chatFeed = document.getElementById('chat-feed');
+    const input = document.getElementById('chat-input');
+    const fileInput = document.getElementById('video-upload');
+    const sidebar = document.getElementById("sidebar");
+    const sidebarBtn = document.getElementById("sidebar-btn");
+    const btnIcon = sidebarBtn ? sidebarBtn.querySelector("i") : null;
+
+    // --- SIDEBAR ---
+    if(sidebarBtn) {
+        sidebarBtn.addEventListener("click", () => {
+            sidebar.classList.toggle("open");
+            if(sidebar.classList.contains("open")) btnIcon.classList.replace("fa-chevron-right", "fa-chevron-left");
+            else btnIcon.classList.replace("fa-chevron-left", "fa-chevron-right");
+        });
+    }
+
+    // --- LOCALIZATION ---
+    let currentLang = 'ru';
+
+    const translations = {
+        ru: {
+            subtitle: "Образовательная медиа-платформа",
+            nav_dash: "Панель управления",
+            nav_lib: "Медиатека",
+            nav_chat: "AI Медиа Чат",
+            nav_trim: "AI Обрезка видео",
+            nav_bot: "AI Чат-бот",
+            nav_vision: "Компьютерное зрение",
+            role: "Студент",
+            header_title: "WorldSkills Ассистент",
+            header_desc: "Генерация контента, постеров и видео для WorldSkills",
+            ai_greeting: "Привет! Я помогу с WorldSkills. <br>📝 <b>Пиши текст</b> для генерации контента.<br>🎨 Жми <b>\"Постер\"</b> для генерации картинок.<br>📎 Жми <b>Скрепку</b> для создания Reels из видео.",
+            btn_poster: "Сгенерировать Постер",
+            input_ph: "Опишите задачу или введите промпт...",
+            alert_poster: "Пожалуйста, напишите описание постера в поле ввода.",
+            msg_poster: "🎨 Генерация постера: ",
+            load_gen: "Генерация контента",
+            load_poster: "Генерация постера",
+            load_reel: "Обработка видео (Reel)",
+            msg_video: "📎 Видео загружено: ",
+            msg_done: "Готово! Вот результат:",
+            link_download: "Скачать файл",
+            error_img: "Картинка создана, но URL не найден.",
+            error_server: "Ошибка сервера: "
+        },
+        kz: {
+            subtitle: "Білім беру медиа платформасы",
+            nav_dash: "Басқару тақтасы",
+            nav_lib: "Медиа кітапхана",
+            nav_chat: "AI Медиа Чаты",
+            nav_trim: "AI Видео Қию",
+            nav_bot: "AI Чат-бот",
+            nav_vision: "Компьютерлік көру",
+            role: "Студент",
+            header_title: "WorldSkills Ассистенті",
+            header_desc: "WorldSkills үшін контент, постер және видео жасау",
+            ai_greeting: "Сәлем! Мен WorldSkills бойынша көмектесемін. <br>📝 Контент үшін <b>мәтін жаз</b>.<br>🎨 Суреттер үшін <b>\"Постер\"</b> бас.<br>📎 Reels жасау үшін <b>Қыстырғышты</b> бас.",
+            btn_poster: "Постер жасау",
+            input_ph: "Тапсырманы сипаттаңыз немесе сұраныс жазыңыз...",
+            alert_poster: "Постер сипаттамасын енгізу өрісіне жазыңыз.",
+            msg_poster: "🎨 Постер жасалуда: ",
+            load_gen: "Контент жасалуда",
+            load_poster: "Постер жасалуда",
+            load_reel: "Видео өңделуде (Reel)",
+            msg_video: "📎 Видео жүктелді: ",
+            msg_done: "Дайын! Міне нәтиже:",
+            link_download: "Файлды жүктеу",
+            error_img: "Сурет жасалды, бірақ URL табылмады.",
+            error_server: "Сервер қатесі: "
+        }
+    };
+
+    function toggleLanguage() {
+        currentLang = currentLang === 'ru' ? 'kz' : 'ru';
+        const langButton = document.querySelector('.lang-switch');
+        langButton.textContent = currentLang === 'ru' ? '🇰🇿 QAZ' : '🇷🇺 RUS';
+
+        const elements = document.querySelectorAll('[data-key]');
+        elements.forEach(el => {
+            const key = el.getAttribute('data-key');
+            if (translations[currentLang][key]) {
+                if(el.tagName === 'INPUT') {
+                    el.placeholder = translations[currentLang][key];
+                } else if (el.classList.contains('bubble')) {
+                    el.innerHTML = translations[currentLang][key]; // Для сохранения HTML тегов
+                } else {
+                    el.textContent = translations[currentLang][key];
+                }
+            }
+        });
+    }
+
+    // --- LOGIC 1: GENERAL CHAT (TEXT) ---
+    async function sendMessage() {
+        const text = input.value.trim();
+        if (!text) return;
+
+        appendMessage(text, 'user');
+        input.value = '';
+        
+        const loadingId = showLoading(translations[currentLang].load_gen);
+
+        try {
+            const response = await fetch(`${BASE_URL}/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
+                body: JSON.stringify({ prompt: text })
+            });
+
+            const data = await response.json();
+            removeLoading(loadingId);
+            
+            const content = data.content || data.text || data.result || JSON.stringify(data);
+            appendMessage(content, 'ai');
+
+        } catch (error) {
+            handleError(error, loadingId);
+        }
+    }
+
+    // --- LOGIC 2: IMAGE GENERATION ---
+    async function generateImage() {
+        const text = input.value.trim();
+        if (!text) {
+            alert(translations[currentLang].alert_poster);
+            return;
+        }
+
+        appendMessage(`${translations[currentLang].msg_poster} "${text}"`, 'user');
+        input.value = '';
+        
+        const loadingId = showLoading(translations[currentLang].load_poster);
+
+        try {
+            const response = await fetch(`${BASE_URL}/generate-image`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
+                body: JSON.stringify({ prompt: text })
+            });
+
+            if(!response.ok) throw new Error("Server error");
+            
+            const data = await response.json();
+            const imageUrl = data.image_url || data.url || data.result; 
+
+            removeLoading(loadingId);
+
+            if (imageUrl) {
+                appendMedia(imageUrl, 'image');
+            } else {
+                appendMessage(translations[currentLang].error_img, 'ai');
+            }
+
+        } catch (error) {
+            handleError(error, loadingId);
+        }
+    }
+
+    // --- LOGIC 3: VIDEO TO REEL ---
+    function triggerVideoUpload() {
+        fileInput.click();
+    }
+
+    fileInput.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        appendMessage(`${translations[currentLang].msg_video} ${file.name}`, 'user');
+        const loadingId = showLoading(translations[currentLang].load_reel);
+
+        const formData = new FormData();
+        formData.append('video', file);
+
+        try {
+            const response = await fetch(`${BASE_URL}/video-to-reel`, {
+                method: 'POST',
+                headers: { 'ngrok-skip-browser-warning': 'true' },
+                body: formData
+            });
+
+            if(!response.ok) throw new Error("Server error");
+
+            const blob = await response.blob();
+            const videoUrl = URL.createObjectURL(blob);
+
+            removeLoading(loadingId);
+            appendMedia(videoUrl, 'video');
+
+        } catch (error) {
+            handleError(error, loadingId);
+        }
+        
+        fileInput.value = ''; 
+    });
+
+
+    // --- UI FUNCTIONS ---
+
+    function appendMessage(text, sender) {
+        const row = document.createElement('div');
+        row.className = `message-row ${sender}`;
+        
+        let avatarHtml = sender === 'ai' ? '<div class="ai-avatar"><i class="fa-solid fa-robot"></i></div>' : '';
+        
+        row.innerHTML = `
+            ${avatarHtml}
+            <div class="msg-content">
+                <div class="bubble">${text.replace(/\n/g, '<br>')}</div>
+            </div>
+        `;
+        chatFeed.appendChild(row);
+        chatFeed.scrollTop = chatFeed.scrollHeight;
+    }
+
+    function appendMedia(url, type) {
+        const row = document.createElement('div');
+        row.className = `message-row ai`;
+        
+        let content = '';
+        if (type === 'image') {
+            content = `<img src="${url}" class="chat-media">`;
+        } else if (type === 'video') {
+            content = `<video src="${url}" controls class="chat-media chat-video"></video>`;
+        }
+
+        row.innerHTML = `
+            <div class="ai-avatar"><i class="fa-solid fa-robot"></i></div>
+            <div class="msg-content">
+                <div class="bubble">${translations[currentLang].msg_done}</div>
+                ${content}
+                <div class="helper-text"><a href="${url}" download="result">${translations[currentLang].link_download}</a></div>
+            </div>
+        `;
+        chatFeed.appendChild(row);
+        chatFeed.scrollTop = chatFeed.scrollHeight;
+    }
+
+    function showLoading(text) {
+        const id = 'load-' + Date.now();
+        const row = document.createElement('div');
+        row.id = id;
+        row.className = 'message-row ai';
+        row.innerHTML = `
+            <div class="ai-avatar"><i class="fa-solid fa-spinner fa-spin"></i></div>
+            <div class="msg-content">
+                <div class="bubble loading-dots" style="color: #888">${text}</div>
+            </div>
+        `;
+        chatFeed.appendChild(row);
+        chatFeed.scrollTop = chatFeed.scrollHeight;
+        return id;
+    }
+
+    function removeLoading(id) {
+        const el = document.getElementById(id);
+        if (el) el.remove();
+    }
+
+    function handleError(error, loadingId) {
+        console.error(error);
+        removeLoading(loadingId);
+        appendMessage("⚠️ " + translations[currentLang].error_server + error.message, 'ai');
+    }
+
+</script>
+
+</body>
+</html>

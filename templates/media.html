@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeuroMedia - Медиатека</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/media.css">
+    <style>
+        /* Стили для переключателя языка и хедера */
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .lang-switch {
+            background: transparent;
+            border: 1px solid var(--primary-green, #00C292);
+            color: var(--text-dark, #333);
+            padding: 5px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .lang-switch:hover {
+            background: var(--primary-green, #00C292);
+            color: white;
+        }
+        
+        /* Адаптив хедера */
+        @media (max-width: 768px) {
+            .header-content { flex-direction: column; align-items: flex-start; gap: 15px; }
+            .header-actions { width: 100%; justify-content: space-between; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="sidebar" id="sidebar">
+        <div class="logo">
+            <i class="fa-solid fa-bolt" style="color: var(--primary-green);"></i>
+            <div>
+                <span>NeuroMedia</span>
+                <span class="logo-subtitle" data-key="subtitle">Образовательная медиа-платформа</span>
+            </div>
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-item"><a href="./dashboard.html" class="nav-link"><i class="fa-solid fa-house"></i><span data-key="nav_dash">Панель управления</span></a></li>
+            <li class="nav-item"><a href="./media.html" class="nav-link active"><i class="fa-solid fa-photo-film"></i><span data-key="nav_lib">Медиатека</span></a></li>
+            <li class="nav-item"><a href="./media-chat.html" class="nav-link"><i class="fa-regular fa-comments"></i><span data-key="nav_chat">AI Медиа Чат</span></a></li>
+            <li class="nav-item"><a href="./ai-video.html" class="nav-link"><i class="fa-solid fa-scissors"></i><span data-key="nav_trim">AI Обрезка видео</span></a></li>
+            <li class="nav-item"><a href="./ai-chat.html" class="nav-link"><i class="fa-solid fa-robot"></i><span data-key="nav_bot">AI Чат-бот</span></a></li>
+            <li class="nav-item"><a href="./computer-v.html" class="nav-link"><i class="fa-regular fa-eye"></i><span data-key="nav_vision">Компьютерное зрение</span></a></li>
+            <li class="nav-item"><a href="./world-skils.html" class="nav-link"><i class="fa-solid fa-trophy"></i><span>WorldSkills</span></a></li>
+        </ul>
+        <div class="user-profile">
+            <img src="https://i.pravatar.cc/100?img=33" alt="User" class="avatar">
+            <div class="user-info"><h4>Алихан Б.</h4><p data-key="role">Студент</p></div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <header>
+            <div class="header-content">
+                <div class="header-title">
+                    <h1 data-key="header_title">Медиатека</h1>
+                    <p data-key="header_desc">Просмотр и управление медиафайлами</p>
+                </div>
+                <div class="header-actions">
+                    <button class="lang-switch" onclick="toggleLanguage()">🇰🇿 QAZ</button>
+                    <button class="btn-primary"><i class="fa-solid fa-cloud-arrow-up"></i> <span data-key="btn_upload">Загрузить</span></button>
+                </div>
+            </div>
+        </header>
+
+        <div class="toolbar">
+            <div class="search-container">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" class="search-input" data-key="search_ph" placeholder="Поиск файлов...">
+            </div>
+            <div class="filter-actions">
+                <button class="dropdown"><span data-key="filter_all">Все типы</span> <i class="fa-solid fa-chevron-down" style="font-size: 10px;"></i></button>
+                <button class="dropdown"><span data-key="filter_recent">Недавние</span> <i class="fa-solid fa-chevron-down" style="font-size: 10px;"></i></button>
+                <button class="icon-btn green"><i class="fa-solid fa-question"></i></button>
+                <button class="icon-btn"><i class="fa-solid fa-list"></i></button>
+            </div>
+        </div>
+
+        <div class="media-grid">
+            
+            <div class="media-card">
+                <div class="card-preview">
+                    <img src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=500&q=60" class="card-img" alt="Campus">
+                    <span class="badge badge-image" data-key="badge_img">Изображение</span>
+                </div>
+                <div class="card-body">
+                    <div>
+                        <div class="file-name">campus_main.jpg</div>
+                        <div class="file-meta">2.4 MB • <span data-key="time_2d">2 дня назад</span></div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="color-tag"></div>
+                        <div class="delete-btn"><i class="fa-solid fa-trash"></i></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="media-card">
+                <div class="card-preview">
+                    <img src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=500&q=60" class="card-img" alt="Library">
+                    <span class="badge badge-video" data-key="badge_vid">Видео</span>
+                </div>
+                <div class="card-body">
+                    <div>
+                        <div class="file-name">library_tour.mp4</div>
+                        <div class="file-meta">45.8 MB • <span data-key="time_5d">5 дней назад</span></div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="color-tag" style="background: transparent;"></div> <div class="delete-btn" style="background: transparent; color: #ccc;"><i class="fa-solid fa-trash"></i></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="media-card">
+                <div class="card-preview">
+                    <div class="logo-placeholder">
+                        <div class="logo-box">NM</div>
+                    </div>
+                    <span class="badge badge-logo" data-key="badge_logo">Логотип</span>
+                </div>
+                <div class="card-body">
+                    <div>
+                        <div class="file-name">neuromedia_logo.svg</div>
+                        <div class="file-meta">124 KB • <span data-key="time_1w">1 неделю назад</span></div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="color-tag" style="background: transparent;"></div>
+                        <div class="delete-btn" style="background: transparent; color: #ccc;"><i class="fa-solid fa-trash"></i></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="media-card">
+                <div class="card-preview">
+                    <img src="https://images.unsplash.com/photo-1526232761682-d26e03ac148e?auto=format&fit=crop&w=500&q=60" class="card-img" alt="Sports">
+                    <span class="badge badge-image" data-key="badge_img">Изображение</span>
+                </div>
+                <div class="card-body">
+                    <div>
+                        <div class="file-name">sports_day.jpg</div>
+                        <div class="file-meta">3.2 MB • <span data-key="time_3d">3 дня назад</span></div>
+                    </div>
+                    <div class="card-footer">
+                         <div class="color-tag" style="background: transparent;"></div>
+                         <div class="delete-btn" style="background: transparent; color: #ccc;"><i class="fa-solid fa-trash"></i></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="media-card">
+                <div class="card-preview">
+                    <img src="https://images.unsplash.com/photo-1517927033932-b3d18e61fb3a?auto=format&fit=crop&w=500&q=60" class="card-img" alt="Sports">
+                    <span class="badge badge-image" data-key="badge_img">Изображение</span>
+                </div>
+                <div class="card-body">
+                    <div>
+                        <div class="file-name">sports_day_final.jpg</div>
+                        <div class="file-meta">3.5 MB • <span data-key="time_3d">3 дня назад</span></div>
+                    </div>
+                    <div class="card-footer">
+                         <div class="color-tag" style="background: transparent;"></div>
+                         <div class="delete-btn" style="background: transparent; color: #ccc;"><i class="fa-solid fa-trash"></i></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="media-card">
+                <div class="card-preview">
+                    <img src="https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?auto=format&fit=crop&w=500&q=60" class="card-img" alt="Graduation">
+                    <span class="badge badge-video" data-key="badge_vid">Видео</span>
+                </div>
+                <div class="card-body">
+                    <div>
+                        <div class="file-name">graduation_2024.mp4</div>
+                        <div class="file-meta">128 MB • <span data-key="time_1w">1 неделю назад</span></div>
+                    </div>
+                    <div class="card-footer">
+                         <div class="color-tag" style="background: transparent;"></div>
+                         <div class="delete-btn" style="background: transparent; color: #ccc;"><i class="fa-solid fa-trash"></i></div>
+                    </div>
+                </div>
+            </div>
+
+             <div class="media-card">
+                <div class="card-preview">
+                    <img src="https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=500&q=60" class="card-img" alt="Lab">
+                    <span class="badge badge-image" data-key="badge_img">Изображение</span>
+                </div>
+                <div class="card-body">
+                    <div>
+                        <div class="file-name">lab_session.jpg</div>
+                        <div class="file-meta">4.1 MB • <span data-key="time_4d">4 дня назад</span></div>
+                    </div>
+                    <div class="card-footer">
+                         <div class="color-tag" style="background: transparent;"></div>
+                         <div class="delete-btn" style="background: transparent; color: #ccc;"><i class="fa-solid fa-trash"></i></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="media-card">
+                <div class="card-preview">
+                    <div class="logo-placeholder">
+                        <div class="logo-box">NM</div>
+                    </div>
+                    <span class="badge badge-logo" data-key="badge_logo">Логотип</span>
+                </div>
+                <div class="card-body">
+                    <div>
+                        <div class="file-name">neuromedia_logo.svg</div>
+                        <div class="file-meta">124 KB • <span data-key="time_1w">1 неделю назад</span></div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="color-tag" style="background: transparent;"></div>
+                        <div class="delete-btn" style="background: transparent; color: #ccc;"><i class="fa-solid fa-trash"></i></div>
+                    </div>
+                </div>
+            </div>
+
+             <div class="media-card">
+                <div class="card-preview">
+                    <img src="https://images.unsplash.com/photo-1526232761682-d26e03ac148e?auto=format&fit=crop&w=500&q=60" class="card-img" alt="Sports">
+                    <span class="badge badge-image" data-key="badge_img">Изображение</span>
+                </div>
+                <div class="card-body">
+                    <div>
+                        <div class="file-name">sports_day.jpg</div>
+                        <div class="file-meta">3.2 MB • <span data-key="time_3d">3 дня назад</span></div>
+                    </div>
+                    <div class="card-footer">
+                         <div class="color-tag" style="background: transparent;"></div>
+                         <div class="delete-btn" style="background: transparent; color: #ccc;"><i class="fa-solid fa-trash"></i></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+<div class="sidebar-handle" id="sidebar-btn"></div>
+
+<script>
+    const sidebar = document.getElementById("sidebar");
+    const btn = document.getElementById("sidebar-btn");
+
+    btn.addEventListener("click", () => {
+        sidebar.classList.toggle("open");
+    });
+
+    // --- Локализация (RU / KZ) ---
+    let currentLang = 'ru';
+
+    const translations = {
+        ru: {
+            subtitle: "Образовательная медиа-платформа",
+            nav_dash: "Панель управления",
+            nav_lib: "Медиатека",
+            nav_chat: "AI Медиа Чат",
+            nav_trim: "AI Обрезка видео",
+            nav_bot: "AI Чат-бот",
+            nav_vision: "Компьютерное зрение",
+            role: "Студент",
+            header_title: "Медиатека",
+            header_desc: "Просмотр и управление медиафайлами",
+            btn_upload: "Загрузить",
+            search_ph: "Поиск файлов...",
+            filter_all: "Все типы",
+            filter_recent: "Недавние",
+            badge_img: "Изображение",
+            badge_vid: "Видео",
+            badge_logo: "Логотип",
+            time_2d: "2 дня назад",
+            time_3d: "3 дня назад",
+            time_4d: "4 дня назад",
+            time_5d: "5 дней назад",
+            time_1w: "1 неделю назад"
+        },
+        kz: {
+            subtitle: "Білім беру медиа платформасы",
+            nav_dash: "Басқару тақтасы",
+            nav_lib: "Медиа кітапхана",
+            nav_chat: "AI Медиа Чаты",
+            nav_trim: "AI Видео Қию",
+            nav_bot: "AI Чат-бот",
+            nav_vision: "Компьютерлік көру",
+            role: "Студент",
+            header_title: "Медиа кітапхана",
+            header_desc: "Медиа файлдарды қарау және басқару",
+            btn_upload: "Жүктеу",
+            search_ph: "Файлдарды іздеу...",
+            filter_all: "Барлық түрлері",
+            filter_recent: "Соңғы",
+            badge_img: "Сурет",
+            badge_vid: "Видео",
+            badge_logo: "Логотип",
+            time_2d: "2 күн бұрын",
+            time_3d: "3 күн бұрын",
+            time_4d: "4 күн бұрын",
+            time_5d: "5 күн бұрын",
+            time_1w: "1 апта бұрын"
+        }
+    };
+
+    function toggleLanguage() {
+        currentLang = currentLang === 'ru' ? 'kz' : 'ru';
+        const langButton = document.querySelector('.lang-switch');
+        
+        // Обновляем текст кнопки
+        langButton.textContent = currentLang === 'ru' ? '🇰🇿 QAZ' : '🇷🇺 RUS';
+
+        // Обновляем все тексты с data-key
+        const elements = document.querySelectorAll('[data-key]');
+        elements.forEach(el => {
+            const key = el.getAttribute('data-key');
+            if (translations[currentLang][key]) {
+                // Если это input (поиск), меняем placeholder
+                if(el.tagName === 'INPUT') {
+                    el.placeholder = translations[currentLang][key];
+                } else {
+                    el.textContent = translations[currentLang][key];
+                }
+            }
+        });
+    }
+</script>
+</body>
+</html>

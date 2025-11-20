@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeuroMedia - AI Чат-бот</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/ai-chat.css">
+    <style>
+        /* --- СТИЛИ ДЛЯ ПЕРЕКЛЮЧАТЕЛЯ ЯЗЫКА --- */
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        .lang-switch {
+            background: transparent;
+            border: 1px solid var(--primary-green, #00C292);
+            color: var(--text-dark, #2D3436);
+            padding: 5px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+            white-space: nowrap;
+        }
+        .lang-switch:hover {
+            background: var(--primary-green, #00C292);
+            color: white;
+        }
+
+        /* Адаптив хедера */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: row; /* Оставляем в ряд на мобильных */
+                gap: 10px;
+            }
+            .page-header h2 { font-size: 20px; }
+            .page-header p { font-size: 12px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar-handle" id="sidebar-btn"></div>
+
+    <nav class="sidebar" id="sidebar">
+        <div class="logo">
+            <i class="fa-solid fa-bolt" style="color: var(--primary-green);"></i>
+            <div>
+                <span>NeuroMedia</span>
+                <span class="logo-subtitle" data-key="subtitle">Образовательная медиа-платформа</span>
+            </div>
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-item"><a href="./dashboard.html" class="nav-link"><i class="fa-solid fa-house"></i><span data-key="nav_dash">Панель управления</span></a></li>
+            <li class="nav-item"><a href="./media.html" class="nav-link"><i class="fa-solid fa-photo-film"></i><span data-key="nav_lib">Медиатека</span></a></li>
+            <li class="nav-item"><a href="./media-chat.html" class="nav-link"><i class="fa-regular fa-comments"></i><span data-key="nav_chat">AI Медиа Чат</span></a></li>
+            <li class="nav-item"><a href="./ai-video.html" class="nav-link"><i class="fa-solid fa-scissors"></i><span data-key="nav_trim">AI Обрезка видео</span></a></li>
+            <li class="nav-item"><a href="./ai-chat.html" class="nav-link active"><i class="fa-solid fa-robot"></i><span data-key="nav_bot">AI Чат-бот</span></a></li>
+            <li class="nav-item"><a href="./computer-v.html" class="nav-link"><i class="fa-regular fa-eye"></i><span data-key="nav_vision">Компьютерное зрение</span></a></li>
+            <li class="nav-item"><a href="./world-skils.html" class="nav-link"><i class="fa-solid fa-trophy"></i><span>WorldSkills</span></a></li>
+        </ul>
+        <div class="user-profile">
+            <img src="https://i.pravatar.cc/100?img=33" alt="User" class="avatar">
+            <div class="user-info"><h4>Алихан Б.</h4><p data-key="role">Студент</p></div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <header class="page-header">
+            <div class="header-content">
+                <div>
+                    <h2 data-key="header_title">AI Чат-бот</h2>
+                    <p data-key="header_desc">Спрашивайте о колледже что угодно</p>
+                </div>
+                <button class="lang-switch" onclick="toggleLanguage()">🇰🇿 QAZ</button>
+            </div>
+        </header>
+
+        <div class="avatar-stage">
+            <div id="mascot" class="robot-head">
+                <div class="eyes-container">
+                    <div class="eye"></div><div class="eye"></div>
+                </div>
+                <div class="loader-ring"></div>
+                <div class="voice-wave">
+                    <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-box" id="chat-box">
+            <div class="msg ai" data-key="mascot_greeting">Привет! Я Инти. Чем могу помочь? 🤖</div>
+        </div>
+
+        <div class="prompts-scroll">
+            <button class="prompt-btn" data-key="btn_college" onclick="sendPrompt(this)">Расскажи про колледж</button>
+            <button class="prompt-btn" data-key="btn_specialties" onclick="sendPrompt(this)">Специальности</button>
+            <button class="prompt-btn" data-key="btn_cost" onclick="sendPrompt(this)">Стоимость обучения</button>
+            <button class="prompt-btn" data-key="btn_admission" onclick="sendPrompt(this)">Как поступить?</button>
+        </div>
+
+        <div class="input-wrapper">
+            <input type="text" id="inp" class="input-field" data-key="input_ph" placeholder="Ваш вопрос..." onkeypress="if(event.key==='Enter') send()">
+            <button class="send-btn" onclick="send()"><i class="fa-solid fa-paper-plane"></i></button>
+        </div>
+    </main>
+
+<script>
+    // --- CONFIG ---
+    const SERVER_URL = "http://127.0.0.1:8000"; 
+    
+    // --- ELEMENTS ---
+    const mascotDiv = document.getElementById('mascot');
+    const chatBox = document.getElementById('chat-box');
+    const inp = document.getElementById('inp');
+    const sidebar = document.getElementById("sidebar");
+    const sidebarBtn = document.getElementById("sidebar-btn");
+    const btnIcon = sidebarBtn ? sidebarBtn.querySelector("i") : null;
+
+    // --- SIDEBAR LOGIC ---
+    if(sidebarBtn){
+        sidebarBtn.addEventListener("click", () => {
+            sidebar.classList.toggle("open");
+            if(sidebar.classList.contains("open")) {
+                btnIcon.classList.replace("fa-chevron-right", "fa-chevron-left");
+            } else {
+                btnIcon.classList.replace("fa-chevron-left", "fa-chevron-right");
+            }
+        });
+    }
+    
+    // Закрытие меню при клике вне (мобильные)
+    document.addEventListener('click', (e) => {
+        if (window.innerWidth <= 768 && sidebarBtn) {
+            if (!sidebar.contains(e.target) && !sidebarBtn.contains(e.target)) {
+                sidebar.classList.remove("open");
+                btnIcon.classList.replace("fa-chevron-left", "fa-chevron-right");
+            }
+        }
+    });
+
+    // --- ЛОКАЛИЗАЦИЯ (RU/KZ) ---
+    let currentLang = 'ru';
+
+    const translations = {
+        ru: {
+            subtitle: "Образовательная медиа-платформа",
+            nav_dash: "Панель управления",
+            nav_lib: "Медиатека",
+            nav_chat: "AI Медиа Чат",
+            nav_trim: "AI Обрезка видео",
+            nav_bot: "AI Чат-бот",
+            nav_vision: "Компьютерное зрение",
+            role: "Студент",
+            header_title: "AI Чат-бот",
+            header_desc: "Спрашивайте о колледже что угодно",
+            mascot_greeting: "Привет! Я Инти. Чем могу помочь? 🤖",
+            btn_college: "Расскажи про колледж",
+            btn_specialties: "Специальности",
+            btn_cost: "Стоимость обучения",
+            btn_admission: "Как поступить?",
+            input_ph: "Ваш вопрос..."
+        },
+        kz: {
+            subtitle: "Білім беру медиа платформасы",
+            nav_dash: "Басқару тақтасы",
+            nav_lib: "Медиа кітапхана",
+            nav_chat: "AI Медиа Чаты",
+            nav_trim: "AI Видео Қию",
+            nav_bot: "AI Чат-бот",
+            nav_vision: "Компьютерлік көру",
+            role: "Студент",
+            header_title: "AI Чат-бот",
+            header_desc: "Колледж туралы кез келген сұрақты қойыңыз",
+            mascot_greeting: "Сәлем! Мен Интимін. Қалай көмектесе аламын? 🤖",
+            btn_college: "Колледж туралы айт",
+            btn_specialties: "Мамандықтар",
+            btn_cost: "Оқу құны",
+            btn_admission: "Қалай түсуге болады?",
+            input_ph: "Сұрағыңыз..."
+        }
+    };
+
+    function toggleLanguage() {
+        currentLang = currentLang === 'ru' ? 'kz' : 'ru';
+        const langButton = document.querySelector('.lang-switch');
+        
+        langButton.textContent = currentLang === 'ru' ? '🇰🇿 QAZ' : '🇷🇺 RUS';
+
+        const elements = document.querySelectorAll('[data-key]');
+        elements.forEach(el => {
+            const key = el.getAttribute('data-key');
+            if (translations[currentLang][key]) {
+                if(el.tagName === 'INPUT') {
+                    el.placeholder = translations[currentLang][key];
+                } else {
+                    el.textContent = translations[currentLang][key];
+                }
+            }
+        });
+    }
+
+    // --- MASCOT & CHAT LOGIC ---
+    function setMascotState(state) {
+        mascotDiv.classList.remove('state-thinking', 'state-speaking');
+        if (state === 'thinking') mascotDiv.classList.add('state-thinking');
+        if (state === 'speaking') mascotDiv.classList.add('state-speaking');
+    }
+
+    async function send() {
+        const text = inp.value.trim();
+        if (!text) return;
+        addMsg(text, 'user');
+        inp.value = '';
+        processRequest(text);
+    }
+
+    function sendPrompt(btn) {
+        const text = btn.innerText; // Текст кнопки отправляется как есть (на текущем языке)
+        addMsg(text, 'user');
+        processRequest(text);
+    }
+
+    async function processRequest(text) {
+        setMascotState('thinking');
+        try {
+            const respText = await fetch(`${SERVER_URL}/chat`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: text })
+            });
+            
+            if (!respText.ok) throw new Error("Server error");
+            const data = await respText.json();
+            
+            addMsg(data.text, 'ai');
+            await streamAudio(data.text);
+        } catch (e) {
+            console.error(e);
+            const errorMsg = currentLang === 'ru' ? "Ошибка соединения..." : "Қосылым қатесі...";
+            addMsg(errorMsg, 'ai');
+            setMascotState('idle');
+        }
+    }
+
+    async function streamAudio(text) {
+        try {
+            const respAudio = await fetch(`${SERVER_URL}/tts`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: text })
+            });
+            const blob = await respAudio.blob();
+            const url = URL.createObjectURL(blob);
+            const audio = new Audio(url);
+            setMascotState('speaking');
+            audio.onended = () => setMascotState('idle');
+            audio.play();
+        } catch (e) {
+            setMascotState('idle');
+        }
+    }
+
+    function addMsg(text, type) {
+        const div = document.createElement('div');
+        div.className = `msg ${type}`;
+        div.innerText = text;
+        chatBox.appendChild(div);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+</script>
+
+</body>
+</html>
