@@ -86,8 +86,31 @@
                 <input type="text" class="search-input" data-key="search_ph" placeholder="Поиск файлов...">
             </div>
             <div class="filter-actions">
-                <button class="dropdown"><span data-key="filter_all">Все типы</span> <i class="fa-solid fa-chevron-down" style="font-size: 10px;"></i></button>
-                <button class="dropdown"><span data-key="filter_recent">Недавние</span> <i class="fa-solid fa-chevron-down" style="font-size: 10px;"></i></button>
+                <div class="dropdown-wrap">
+                    <button class="dropdown" onclick="toggleDropdown('typeDropdown')">
+                        <span id="currentType" data-key="filter_all">Все типы</span> 
+                        <i class="fa-solid fa-chevron-down" style="font-size: 10px;"></i>
+                    </button>
+                    <div id="typeDropdown" class="dropdown-content">
+                        <a href="#" onclick="selectItem('Все типы', 'currentType')"><i class="fa-solid fa-layer-group"></i> Все типы</a>
+                        <a href="#" onclick="selectItem('Изображения', 'currentType')"><i class="fa-regular fa-image"></i> Изображения</a>
+                        <a href="#" onclick="selectItem('Видео', 'currentType')"><i class="fa-solid fa-video"></i> Видео</a>
+                        <a href="#" onclick="selectItem('Документы', 'currentType')"><i class="fa-regular fa-file"></i> Логотип</a>
+                    </div>
+                </div>
+
+                <div class="dropdown-wrap">
+                    <button class="dropdown" onclick="toggleDropdown('sortDropdown')">
+                        <span id="currentSort" data-key="filter_recent">Недавние</span> 
+                        <i class="fa-solid fa-chevron-down" style="font-size: 10px;"></i>
+                    </button>
+                    <div id="sortDropdown" class="dropdown-content">
+                        <a href="#" onclick="selectItem('Недавние', 'currentSort')"><i class="fa-solid fa-clock-rotate-left"></i> Недавние</a>
+                        <a href="#" onclick="selectItem('Старые', 'currentSort')"><i class="fa-solid fa-calendar"></i> Старые</a>
+                        <a href="#" onclick="selectItem('По имени (А-Я)', 'currentSort')"><i class="fa-solid fa-arrow-down-a-z"></i> По имени (А-Я)</a>
+                        <a href="#" onclick="selectItem('По размеру', 'currentSort')"><i class="fa-solid fa-weight-hanging"></i> По размеру</a>
+                    </div>
+                </div>
                 <button class="icon-btn green"><i class="fa-solid fa-question"></i></button>
                 <button class="icon-btn"><i class="fa-solid fa-list"></i></button>
             </div>
@@ -338,6 +361,48 @@
             }
         });
     }
+</script>
+
+<script>
+    /* --- DROPDOWN LOGIC --- */
+
+// Функция открытия/закрытия
+function toggleDropdown(id) {
+    // Сначала закроем все остальные открытые меню
+    var dropdowns = document.getElementsByClassName("dropdown-content");
+    for (var i = 0; i < dropdowns.length; i++) {
+        if (dropdowns[i].id !== id) {
+            dropdowns[i].classList.remove('show');
+        }
+    }
+    // Переключим текущее
+    document.getElementById(id).classList.toggle("show");
+}
+
+// Функция выбора пункта (меняет текст кнопки)
+function selectItem(text, targetId) {
+    document.getElementById(targetId).innerText = text;
+    // Здесь можно добавить логику фильтрации (например, вызов backend)
+    
+    // Закрываем меню после выбора
+    var dropdowns = document.getElementsByClassName("dropdown-content");
+    for (var i = 0; i < dropdowns.length; i++) {
+        dropdowns[i].classList.remove('show');
+    }
+}
+
+// Закрытие меню при клике вне его области
+window.onclick = function(event) {
+    if (!event.target.closest('.dropdown-wrap')) {
+        var dropdowns = document.getElementsByClassName("dropdown-content");
+        for (var i = 0; i < dropdowns.length; i++) {
+            var openDropdown = dropdowns[i];
+            if (openDropdown.classList.contains('show')) {
+                openDropdown.classList.remove('show');
+            }
+        }
+    }
+}
 </script>
 </body>
 </html>
