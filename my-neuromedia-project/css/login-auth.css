@@ -1,0 +1,73 @@
+
+        /* --- СТИЛИ (Те же, что и были) --- */
+        :root {
+            --primary-green: #00C292;
+            --primary-dark: #009e74;
+            --text-dark: #2D3436;
+            --text-gray: #A0AEC0;
+            --bg-gradient: linear-gradient(135deg, #F4F7FC 0%, #E0F7F0 100%);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+
+        body {
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: var(--bg-gradient);
+            position: relative;
+        }
+
+        #neuro-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
+
+        .auth-container {
+            position: relative;
+            z-index: 10;
+            width: 400px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 20px 50px rgba(0, 194, 146, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            overflow: hidden;
+            transition: height 0.4s ease;
+        }
+
+        .logo { text-align: center; margin-bottom: 30px; font-size: 28px; font-weight: 700; color: var(--text-dark); }
+        .logo span { color: var(--primary-green); }
+        .logo p { font-size: 12px; color: var(--text-gray); font-weight: 400; margin-top: 5px; letter-spacing: 1px; text-transform: uppercase; }
+
+        .form-box { display: flex; flex-direction: column; gap: 20px; transition: transform 0.4s ease, opacity 0.4s ease; }
+        .input-group { position: relative; }
+        .input-group i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--text-gray); transition: 0.3s; }
+
+        .auth-input {
+            width: 100%; padding: 14px 14px 14px 45px; border: 2px solid #E0E6ED; border-radius: 12px;
+            font-size: 14px; outline: none; background: white; transition: 0.3s; color: var(--text-dark);
+        }
+        .auth-input:focus { border-color: var(--primary-green); box-shadow: 0 0 0 4px rgba(0, 194, 146, 0.1); }
+        .auth-input:focus + i { color: var(--primary-green); }
+
+        .btn-auth {
+            background: var(--primary-green); color: white; border: none; padding: 14px;
+            border-radius: 12px; font-weight: 600; font-size: 16px; cursor: pointer;
+            transition: 0.3s; box-shadow: 0 5px 15px rgba(0, 194, 146, 0.3);
+        }
+        .btn-auth:hover { background: var(--primary-dark); transform: translateY(-2px); }
+        .btn-auth:disabled { background: #ccc; cursor: wait; transform: none; }
+
+        .switch-text { text-align: center; margin-top: 15px; font-size: 13px; color: var(--text-gray); }
+        .switch-link { color: var(--primary-green); cursor: pointer; font-weight: 600; text-decoration: none; }
+        .switch-link:hover { text-decoration: underline; }
+
+        .hidden { display: none; opacity: 0; transform: translateX(20px); }
+        .fade-in { animation: fadeIn 0.5s forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .ai-icon { position: absolute; top: -30px; right: -30px; font-size: 150px; color: var(--primary-green); opacity: 0.05; transform: rotate(15deg); pointer-events: none; }
+        
+        /* Сообщение об ошибке */
+        .error-msg { color: #ff5b5c; font-size: 12px; text-align: center; margin-top: -10px; min-height: 18px; }

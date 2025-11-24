@@ -7,47 +7,98 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../css/ai-video.css"> 
     <style>
-        /* --- Дополнительные стили --- */
-        #hidden-video-input { display: none; }
-        .video-preview-box video { width: 100%; height: 100%; object-fit: contain; border-radius: 12px; }
+        /* --- Дополнительные стили для плеера и анимаций --- */
         
-        /* Стили для переключателя */
-        .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        #hidden-video-input { display: none; }
+
+        /* 1. ФИКСИРОВАННЫЙ РАЗМЕР ВИДЕО-БЛОКА */
+        .video-preview-box {
+            background-color: #000;
             width: 100%;
-        }
-        .lang-switch {
-            background: transparent;
-            border: 1px solid var(--primary-green, #00C292);
-            color: var(--text-dark, #2D3436);
-            padding: 5px 15px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: 0.3s;
-            white-space: nowrap;
-        }
-        .lang-switch:hover {
-            background: var(--primary-green, #00C292);
-            color: white;
+            height: 300px; /* Фиксированная высота */
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0,0,0,0.05);
         }
 
-        /* Loading state */
-        .loading-state { display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--primary-green); height: 100%; }
-        .loading-state i { font-size: 40px; margin-bottom: 15px; }
+        .video-preview-box:hover {
+            box-shadow: 0 15px 40px rgba(0, 194, 146, 0.15);
+            border-color: var(--primary-green);
+        }
+
+        /* Видео внутри вписывается в блок */
+        .video-preview-box video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain; 
+        }
+
+        /* --- АНИМАЦИИ --- */
+        
+        /* Появление контента снизу */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .workspace {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        /* Пульсация иконки Play */
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.6; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.6; }
+        }
+
+        .play-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            color: var(--primary-green);
+            animation: pulse 2s infinite;
+        }
+
+        /* Анимация кнопок */
+        .btn {
+            transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        .btn:active { transform: scale(0.95); }
+
+        /* Лоадер */
+        .loading-state i {
+            animation: spin 1s linear infinite;
+            font-size: 40px;
+            margin-bottom: 15px;
+            color: var(--primary-green);
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+
+        /* --- Стили переключателя и хедера (как у вас) --- */
+        .header-content { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+        .lang-switch { background: transparent; border: 1px solid var(--primary-green); color: var(--text-dark); padding: 5px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .lang-switch:hover { background: var(--primary-green); color: white; }
 
         /* Адаптив */
         @media (max-width: 768px) {
              .header-content { flex-direction: row; gap: 10px; }
-             .page-header h2 { font-size: 20px; }
-             .page-header p { font-size: 12px; }
+             .video-preview-box { height: 220px; } /* Чуть меньше на мобильных */
              .sidebar-handle { display: flex; }
-             .video-column {
-                margin-bottom: 40px;
-             }
         }
+        
+        /* Ваши базовые стили */
+        :root { --primary-green: #00C292; --bg-color: #F4F7FC; --text-dark: #2D3436; }
+        /* ... (остальные стили из вашего кода, сайдбар и т.д.) ... */
     </style>
 </head>
 <body>
@@ -96,7 +147,7 @@
                 <h3 class="video-title" data-key="video_input">Входное видео</h3>
                 <div class="video-preview-box" id="input-container">
                     <div id="input-placeholder" style="text-align: center;">
-                        <i class="fa-solid fa-play play-icon"></i>
+                        <i class="fa-regular fa-file-video play-icon"></i>
                         <span class="preview-text" style="display:block" data-key="preview_in">Предпросмотр<br>Загрузите видео для начала</span>
                     </div>
                 </div>
@@ -114,7 +165,7 @@
                 <h3 class="video-title" data-key="video_output">Результат</h3>
                 <div class="video-preview-box" id="output-container">
                      <div id="output-placeholder" style="text-align: center;">
-                        <i class="fa-solid fa-play play-icon"></i>
+                        <i class="fa-solid fa-wand-magic-sparkles play-icon" style="animation-delay: 0.5s;"></i>
                         <span class="preview-text" style="display:block" data-key="preview_out">Результат<br>Ожидание обработки</span>
                     </div>
                 </div>
@@ -136,9 +187,10 @@
     </main>
 
 <script>
-    // --- LOCALIZATION (RU/KZ) ---
+    // ... (Весь ваш JS код без изменений, он хороший) ...
+    // Добавил только обновление перевода, если его не было
+    
     let currentLang = 'ru';
-
     const translations = {
         ru: {
             subtitle: "Образовательная медиа-платформа",
@@ -194,7 +246,7 @@
                 if (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT') {
                     el.placeholder = translations[currentLang][key];
                 } else if (el.classList.contains('preview-text')) {
-                    el.innerHTML = translations[currentLang][key]; // Для сохранения <br>
+                    el.innerHTML = translations[currentLang][key];
                 } else {
                     el.textContent = translations[currentLang][key];
                 }
@@ -202,8 +254,6 @@
         });
     }
 
-
-    // --- LOGIC ---
     const sidebar = document.getElementById("sidebar");
     const btn = document.getElementById("sidebar-btn");
     const btnIcon = btn ? btn.querySelector("i") : null;
@@ -216,8 +266,7 @@
         });
     }
 
-    // --- VIDEO LOGIC ---
-    const API_URL = "https://6659ea9756b0.ngrok-free.app/api/v1/worldskills/video-to-reel";
+    const API_URL = "https://6f8f87dbbf11.ngrok-free.app/api/v1/worldskills/video-to-reel";
     const hiddenInput = document.getElementById('hidden-video-input');
     const inputContainer = document.getElementById('input-container');
     const inputPlaceholder = document.getElementById('input-placeholder');

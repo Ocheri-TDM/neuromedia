@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeuroMedia - AI Генератор</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* --- БАЗОВЫЕ СТИЛИ --- */
+        :root {
+            --primary-green: #00C292;
+            --bg-color: #F4F7FC;
+            --sidebar-bg: #FFFFFF;
+            --text-dark: #2D3436;
+            --text-gray: #A0AEC0;
+            --chat-bg: #ffffff;
+            --user-msg-bg: linear-gradient(135deg, #00C292, #00A37A);
+            --ai-msg-bg: #F4F5F7;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+
+        body {
+            background-color: var(--bg-color);
+            display: flex;
+            height: 100vh;
+            color: var(--text-dark);
+            overflow: hidden;
+        }
+
+        /* --- SIDEBAR (Ваш стандартный) --- */
+        .sidebar {
+            width: 260px; background: var(--sidebar-bg); display: flex; flex-direction: column;
+            padding: 25px; border-right: 1px solid #E0E6ED; flex-shrink: 0; z-index: 200; transition: 0.3s;
+        }
+        .logo { font-size: 22px; font-weight: 700; margin-bottom: 40px; display: flex; align-items: center; gap: 10px; }
+        .logo span { color: var(--primary-green); }
+        .logo-subtitle { font-size: 11px; color: var(--text-gray); display: block; font-weight: 400; margin-top: 2px; }
+        .nav-menu { list-style: none; flex-grow: 1; }
+        .nav-link { display: flex; align-items: center; padding: 12px 15px; text-decoration: none; color: var(--text-gray); border-radius: 10px; font-weight: 500; transition: 0.2s; font-size: 14px; margin-bottom: 8px; }
+        .nav-link i { width: 25px; margin-right: 10px; font-size: 18px; }
+        .nav-link:hover { background: #f5f5f5; color: var(--text-dark); }
+        .nav-link.active { background: var(--primary-green); color: white; box-shadow: 0 4px 12px rgba(0,194,146,0.3); }
+        .user-profile { display: flex; align-items: center; padding-top: 20px; border-top: 1px solid #E0E6ED; }
+        .avatar { width: 40px; height: 40px; border-radius: 50%; margin-right: 12px; }
+        .user-info h4 { font-size: 14px; font-weight: 600; } .user-info p { font-size: 12px; color: var(--text-gray); }
+
+        /* --- MAIN CHAT AREA --- */
+        .main-content {
+            flex-grow: 1; display: flex; flex-direction: column; height: 100%; position: relative;
+            background: #fff; /* Белый фон для чата */
+        }
+
+        .chat-header {
+            padding: 20px 40px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(255,255,255,0.9); backdrop-filter: blur(10px);
+            z-index: 10;
+        }
+        .chat-header h2 { font-size: 20px; font-weight: 700; }
+        .chat-header p { font-size: 13px; color: var(--text-gray); }
+
+        /* --- CHAT FEED --- */
+        .chat-feed {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 30px 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            scroll-behavior: smooth;
+        }
+
+        /* Сообщения */
+        .message {
+            display: flex; gap: 15px; max-width: 85%;
+            opacity: 0; transform: translateY(20px); /* Начальное состояние для анимации */
+            animation: slideUp 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+        @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
+
+        .message.user { align-self: flex-end; flex-direction: row-reverse; }
+        .message.ai { align-self: flex-start; }
+
+        .msg-avatar {
+            width: 38px; height: 38px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; font-size: 18px; color: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .ai .msg-avatar { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .user .msg-avatar { background: linear-gradient(135deg, #00C292, #00A37A); }
+
+        .msg-bubble {
+            padding: 16px 24px;
+            border-radius: 18px;
+            font-size: 15px;
+            line-height: 1.6;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.03);
+            position: relative;
+        }
+
+        .ai .msg-bubble {
+            background: #F7F9FC;
+            color: var(--text-dark);
+            border-top-left-radius: 4px;
+        }
+
+        .user .msg-bubble {
+            background: var(--user-msg-bg);
+            color: white;
+            border-top-right-radius: 4px;
+            box-shadow: 0 4px 15px rgba(0, 194, 146, 0.25);
+        }
+
+        /* --- TYPING INDICATOR --- */
+        .typing-indicator {
+            display: flex; gap: 6px; padding: 15px 20px;
+            background: #F7F9FC; border-radius: 18px; border-top-left-radius: 4px;
+            width: fit-content; align-self: flex-start; margin-left: 53px; /* avatar width + gap */
+            animation: slideUp 0.3s ease forwards;
+        }
+        .dot {
+            width: 8px; height: 8px; background: #B0BCC8; border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+        .dot:nth-child(1) { animation-delay: -0.32s; }
+        .dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+
+        /* --- INPUT AREA --- */
+        .input-area-wrapper {
+            padding: 20px 40px;
+            background: white;
+            border-top: 1px solid #f0f0f0;
+        }
+        .input-container {
+            background: #F7F9FC; border-radius: 16px;
+            display: flex; align-items: center; padding: 8px 15px;
+            border: 1px solid transparent; transition: 0.3s;
+        }
+        .input-container:focus-within {
+            background: white; border-color: var(--primary-green);
+            box-shadow: 0 4px 20px rgba(0, 194, 146, 0.1);
+        }
+        .input-field {
+            flex-grow: 1; border: none; background: transparent;
+            padding: 12px; font-size: 15px; outline: none; color: var(--text-dark);
+        }
+        .send-btn {
+            width: 45px; height: 45px; border-radius: 12px;
+            background: var(--primary-green); color: white; border: none;
+            cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; font-size: 18px;
+        }
+        .send-btn:hover { transform: scale(1.05); background: #00a37a; }
+        .attach-btn { background: none; border: none; color: #A0AEC0; font-size: 20px; cursor: pointer; padding: 0 10px; transition: 0.2s; }
+        .attach-btn:hover { color: var(--text-dark); }
+
+        /* Lang Switch */
+        .lang-switch {
+            background: transparent; border: 1px solid var(--primary-green); color: var(--text-dark);
+            padding: 6px 16px; border-radius: 20px; cursor: pointer; font-weight: 700; font-size: 12px; transition: 0.2s;
+        }
+        .lang-switch:hover { background: var(--primary-green); color: white; }
+
+        /* Mobile */
+        .sidebar-handle { display: none; }
+        @media (max-width: 768px) {
+            .sidebar { position: fixed; left: -260px; height: 100%; box-shadow: 5px 0 20px rgba(0,0,0,0.1); }
+            .sidebar.open { left: 0; }
+            .main-content { padding: 0; }
+            .chat-feed { padding: 20px; }
+            .input-area-wrapper { padding: 15px; }
+            .sidebar-handle { display: flex; position: fixed; top: 20px; left: 20px; z-index: 300; background: white; padding: 10px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+            .chat-header { padding-left: 70px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar-handle" id="sidebar-btn"><i class="fa-solid fa-chevron-right"></i></div>
+
+    <nav class="sidebar" id="sidebar">
+        <div class="logo">
+            <i class="fa-solid fa-bolt" style="color: var(--primary-green);"></i>
+            <div><span style="color: black;">Neuro<span>Media</span></span><span class="logo-subtitle" data-key="subtitle">Образовательная медиа-платформа</span></div>
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-item"><a href="./dashboard.html" class="nav-link"><i class="fa-solid fa-house"></i><span data-key="nav_dash">Панель управления</span></a></li>
+            <li class="nav-item"><a href="./media.html" class="nav-link"><i class="fa-solid fa-photo-film"></i><span data-key="nav_lib">Медиатека</span></a></li>
+            <li class="nav-item"><a href="./media-chat.html" class="nav-link active"><i class="fa-regular fa-comments"></i><span data-key="nav_chat">AI Медиа Чат</span></a></li>
+            <li class="nav-item"><a href="./ai-video.html" class="nav-link"><i class="fa-solid fa-scissors"></i><span data-key="nav_trim">AI Обрезка видео</span></a></li>
+            <li class="nav-item"><a href="./ai-chat.html" class="nav-link"><i class="fa-solid fa-robot"></i><span data-key="nav_bot">AI Чат-бот</span></a></li>
+            <li class="nav-item"><a href="./computer-v.html" class="nav-link"><i class="fa-regular fa-eye"></i><span data-key="nav_vision">Компьютерное зрение</span></a></li>
+            <li class="nav-item"><a href="./world-skils.html" class="nav-link"><i class="fa-solid fa-trophy"></i><span>WorldSkills</span></a></li>
+        </ul>
+        <div class="user-profile">
+            <img src="https://i.pravatar.cc/100?img=33" alt="User" class="avatar">
+            <div class="user-info"><h4>Алихан Б.</h4><p data-key="role">Студент</p></div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <header class="chat-header">
+            <div>
+                <h2 data-key="header_title">AI Генератор Постов</h2>
+                <p data-key="header_desc">Создавайте контент для соцсетей в реальном времени</p>
+            </div>
+            <button class="lang-switch" onclick="toggleLanguage()">🇰🇿 QAZ</button>
+        </header>
+
+        <div class="chat-feed" id="chat-feed">
+            <div class="message ai">
+                <div class="msg-avatar"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+                <div class="msg-bubble" data-key="ai_greeting">
+                    Привет! Я ваш AI-копирайтер. Напишите тему, и я мгновенно создам пост для соцсетей! ✨
+                </div>
+            </div>
+        </div>
+
+        <div class="input-area-wrapper">
+            <div class="input-container">
+                <button class="attach-btn"><i class="fa-solid fa-paperclip"></i></button>
+                <input type="text" class="input-field" id="chat-input" data-key="input_ph" placeholder="Введите тему поста (например: 'День открытых дверей')..." onkeypress="handleEnter(event)">
+                <button class="send-btn" id="send-btn" onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </main>
+
+<script>
+    // --- CONFIG ---
+    const API_URL = "https://6f8f87dbbf11.ngrok-free.app/api/v1/social/generate-post";
+
+    // --- DOM ELEMENTS ---
+    const chatFeed = document.getElementById('chat-feed');
+    const input = document.getElementById('chat-input');
+    const sidebar = document.getElementById("sidebar");
+    const sidebarBtn = document.getElementById("sidebar-btn");
+
+    // --- SIDEBAR LOGIC ---
+    if (sidebarBtn) {
+        sidebarBtn.addEventListener("click", () => {
+            sidebar.classList.toggle("open");
+        });
+    }
+
+    // --- LOCALIZATION ---
+    let currentLang = 'ru';
+    const translations = {
+        ru: {
+            subtitle: "Образовательная медиа-платформа", nav_dash: "Панель управления", nav_lib: "Медиатека", nav_chat: "AI Медиа Чат", nav_trim: "AI Обрезка видео", nav_bot: "AI Чат-бот", nav_vision: "Компьютерное зрение", role: "Студент",
+            header_title: "AI Генератор Постов", header_desc: "Создавайте контент для соцсетей в реальном времени",
+            ai_greeting: "Привет! Я ваш AI-копирайтер. Напишите тему, и я мгновенно создам пост для соцсетей! ✨",
+            input_ph: "Введите тему поста (например: 'День открытых дверей')...",
+            err_server: "Ошибка сервера.", err_cors: "Ошибка CORS. Проверьте расширение."
+        },
+        kz: {
+            subtitle: "Білім беру медиа платформасы", nav_dash: "Басқару тақтасы", nav_lib: "Медиа кітапхана", nav_chat: "AI Медиа Чаты", nav_trim: "AI Видео Қию", nav_bot: "AI Чат-бот", nav_vision: "Компьютерлік көру", role: "Студент",
+            header_title: "AI Пост Генераторы", header_desc: "Әлеуметтік желілерге арналған контент жасау",
+            ai_greeting: "Сәлем! Мен AI-копирайтермін. Тақырыпты жазыңыз, мен пост дайындап беремін! ✨",
+            input_ph: "Пост тақырыбын жазыңыз (мыс. 'Ашық есік күні')...",
+            err_server: "Сервер қатесі.", err_cors: "CORS қатесі."
+        }
+    };
+
+    function toggleLanguage() {
+        currentLang = currentLang === 'ru' ? 'kz' : 'ru';
+        document.querySelector('.lang-switch').textContent = currentLang === 'ru' ? '🇰🇿 QAZ' : '🇷🇺 RUS';
+        document.querySelectorAll('[data-key]').forEach(el => {
+            const key = el.getAttribute('data-key');
+            if (translations[currentLang][key]) {
+                if(el.tagName === 'INPUT') el.placeholder = translations[currentLang][key];
+                else if (!el.classList.contains('msg-bubble') || el.parentElement.parentElement.children.length === 1) el.textContent = translations[currentLang][key];
+            }
+        });
+    }
+
+    // --- CHAT LOGIC ---
+    function handleEnter(e) { if (e.key === 'Enter') sendMessage(); }
+
+    async function sendMessage() {
+        const text = input.value.trim();
+        if (!text) return;
+
+        appendMessage(text, 'user');
+        input.value = '';
+        input.disabled = true;
+
+        const loadingId = showLoading();
+
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'ngrok-skip-browser-warning': 'true'
+                },
+                body: JSON.stringify({ title: text }) 
+            });
+
+            if (!response.ok) throw new Error("Server Error");
+            const data = await response.json();
+            removeLoading(loadingId);
+
+            let postContent = data.text || "Пустой ответ";
+            if (data.hashtags && Array.isArray(data.hashtags)) postContent += `\n\n${data.hashtags.join(" ")}`;
+
+            // Имитация печатания для AI
+            typeWriterMessage(postContent);
+
+        } catch (error) {
+            console.error(error);
+            removeLoading(loadingId);
+            let msg = translations[currentLang].err_server;
+            if(error.message.includes("Failed to fetch")) msg = translations[currentLang].err_cors;
+            appendMessage(msg, 'ai');
+        } finally {
+            input.disabled = false;
+            input.focus();
+        }
+    }
+
+    function appendMessage(text, sender) {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `message ${sender}`;
+        
+        // Иконка
+        const icon = sender === 'ai' ? '<i class="fa-solid fa-wand-magic-sparkles"></i>' : '<i class="fa-regular fa-user"></i>';
+        const avatar = `<div class="msg-avatar">${icon}</div>`;
+        
+        msgDiv.innerHTML = `${avatar}<div class="msg-bubble">${formatText(text)}</div>`;
+        chatFeed.appendChild(msgDiv);
+        scrollToBottom();
+    }
+
+    // Эффект печатания для AI
+    function typeWriterMessage(text) {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `message ai`;
+        msgDiv.innerHTML = `<div class="msg-avatar"><i class="fa-solid fa-wand-magic-sparkles"></i></div><div class="msg-bubble"></div>`;
+        chatFeed.appendChild(msgDiv);
+        
+        const bubble = msgDiv.querySelector('.msg-bubble');
+        let i = 0;
+        const speed = 20; // Скорость печати
+
+        function type() {
+            if (i < text.length) {
+                bubble.textContent += text.charAt(i);
+                i++;
+                scrollToBottom();
+                setTimeout(type, speed);
+            } else {
+                bubble.innerHTML = formatText(bubble.textContent); // Форматируем переносы в конце
+            }
+        }
+        type();
+    }
+
+    function formatText(text) { return text.replace(/\n/g, '<br>'); }
+
+    function showLoading() {
+        const id = 'loading-' + Date.now();
+        const div = document.createElement('div');
+        div.id = id;
+        div.className = 'typing-indicator';
+        div.innerHTML = '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
+        chatFeed.appendChild(div);
+        scrollToBottom();
+        return id;
+    }
+
+    function removeLoading(id) {
+        const el = document.getElementById(id);
+        if (el) el.remove();
+    }
+
+    function scrollToBottom() { chatFeed.scrollTop = chatFeed.scrollHeight; }
+</script>
+
+</body>
+</html>

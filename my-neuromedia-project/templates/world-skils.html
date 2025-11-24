@@ -127,7 +127,7 @@
 
 <script>
     // --- CONFIG ---
-    const BASE_URL = "https://6f8f87dbbf11.ngrok-free.app/api/v1/worldskills";
+    const BASE_URL = "https://6659ea9756b0.ngrok-free.app/api/v1/worldskills";
 
     // --- DOM ELEMENTS ---
     const chatFeed = document.getElementById('chat-feed');
@@ -301,7 +301,8 @@
         const loadingId = showLoading(translations[currentLang].load_reel);
 
         const formData = new FormData();
-        formData.append('video', file);
+        formData.append('type', 'reel');
+        formData.append('file', file);
 
         try {
             const response = await fetch(`${BASE_URL}/video-to-reel`, {
